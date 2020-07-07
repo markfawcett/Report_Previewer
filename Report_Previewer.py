@@ -1,5 +1,7 @@
+#!/usr/bin/env python
+
 # std library imports
-from datetime import datetime
+# from datetime import datetime
 import os
 from pathlib import Path
 import sys
@@ -19,17 +21,17 @@ from watchdog.events import PatternMatchingEventHandler  # type: ignore
 
 # Import local modules
 try:
-    import script_resources.feedback_v2     as feedback
-    import script_resources.file_IO         as file_io
-    # import script_resources.id_html         as id_html
-    import script_resources.shell_format_v2 as shell_format
-    import script_resources.settings        as st
-    import script_resources.triplets        as triplets
-    import script_resources.univ_html_v2    as univ_html
-    import script_resources.word_html       as word_html
-    # import script_resources.cli_interface2   as cli
+    import Report_Previewer_Helpers.feedback_v2     as feedback
+    import Report_Previewer_Helpers.file_IO         as file_io
+    # import Report_Previewer_Helpers.id_html         as id_html
+    import Report_Previewer_Helpers.shell_format_v2 as shell_format
+    import Report_Previewer_Helpers.settings        as st
+    import Report_Previewer_Helpers.triplets        as triplets
+    import Report_Previewer_Helpers.univ_html_v2    as univ_html
+    import Report_Previewer_Helpers.word_html       as word_html
+    # import Report_Previewer_Helpers.cli_interface2   as cli
 except ModuleNotFoundError as e:
-    print('Error: The script requires the script_resources folder.\n', e)
+    print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
 
 
 
@@ -234,7 +236,7 @@ def process_html(html_path, **kwargs):
         file_io.write_html(summary, base_file_name + '-report-summary.html', open_in_browser=False)
 
         # lets also have a go at creating a print-summary
-        import script_resources.print_summary as print_summary
+        import Report_Previewer_Helpers.print_summary as print_summary
         summary_print = print_summary.print_html(summary, **meta)
         file_io.write_html(summary_print, base_file_name + '-print-summary.html', open_in_browser=False)
 
