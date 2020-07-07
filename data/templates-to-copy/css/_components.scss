@@ -1,0 +1,175 @@
+ /*COMPONENTS*/
+/*Skip link*/
+#skiplink{
+  font-size: 1.2rem;
+  text-decoration: none;
+  z-index: 2;
+  margin:-1px;
+  position: absolute;
+  padding: 10px;
+}
+
+/*Report information*/
+#report-information{
+  border-top:1px solid $divider_color;
+  border-bottom: 1px solid $divider_color;
+  margin-top: 34px;
+  padding: 18px 0;
+  @include breakpoint(xs){
+    width: 98%;
+  }
+  @include breakpoint(sm){
+    width: 80%;
+  }
+  @include breakpoint(lg){
+    width: 100%;
+  }
+  p{
+    @include font-face(standard);
+    font-size: 1.25rem;
+    line-height: 24px;
+    color: $text_color;
+    &:nth-child(1){
+      margin-top: 10px;
+    }
+    &:nth-child(2){
+      margin-bottom: 20px;
+    }
+    >span{
+      @include font-face(semi);
+    }
+  }
+  a{
+    font-size: 1.25rem;
+    line-height: 24px;
+  }
+}
+
+/*Full report link container*/
+#full-report-link-container{
+  margin-top: 44px;
+  background-color: $light_purple;
+  height: 60px;
+  box-sizing: border-box;
+  border-left: 2px solid lighten($purple, 15%);
+  @include breakpoint(xs){
+    width: 100%;
+  }
+  @include breakpoint(sm){
+    width: 60%;
+  }
+  @include breakpoint(lg){
+    width: 80%;
+  }
+  @include twoBreakpoints(620,767){
+    width: 70%;
+  }
+  p{
+    font-size: 1.25rem;
+    line-height: 24px;
+    padding-top: 17px;
+    padding-left: 15px;
+    @include breakpoint(xs){
+      padding-left: 5px;
+      padding-top: 6px;
+    }
+    @include twoBreakpoints(433, 767){
+      padding-top: 17px;
+    }
+  }
+}
+
+/*Full report link container - two lines*/
+#two-line-full-report-link-container{
+  @extend #full-report-link-container;
+  p{
+    @include custom_breakpoint(991){
+      padding-top: 7px;
+    }
+  }
+}
+
+#full-report-button-container ul{
+  :nth-child(2){
+    @include breakpoint(xs){
+      margin-top: 3%;
+    }
+  }
+}
+
+/*Download and Contents Headings*/
+#download-heading, #contents-heading{
+  @include font-face(semi);
+  font-size: 2.0625rem;
+  color: $text_color;
+  line-height: 36px;
+  margin-top: 32px;
+}
+
+/*Download and share container*/
+#download-and-share-container{
+  ul{
+    li{
+      a{
+        font-size: 1.5rem;
+      }
+      svg{
+        margin-bottom: -4px;
+      }
+    }
+    li:nth-child(2){
+      @include custom_breakpoint(500){
+        margin-top: 3%;
+      }
+    }
+  }
+}
+
+/*recommendations container*/
+.recommendations-container{
+ background: #E6DEF4;
+ padding: 10px;
+ h2.recommendations-heading{
+   @include font-face(semi);
+ }
+ ul.committee-recommendation-list{
+   list-style-type:none;
+   li{
+    &::before{
+      display: inline-block;
+      content: "";
+      height: 15px;
+      width: 15px;
+      line-height: 15px;
+      background: #373151;
+      position: relative;
+      margin-left: -15px;
+      right: 12px;
+      top: 2px;
+    } 
+   }
+ }
+}
+
+/*Contents List*/
+ul#contents-links{
+  list-style-type: none;
+  margin-left:0;
+  padding-left:0;
+  li{
+    a{
+      @include styleLink(standard, $link_color, $visited_link_color, $link_hover_color, $purple);
+      font-size: 1.6875rem;
+      line-height: 47px;
+    }
+  }
+}
+
+/*Back to Top Button*/
+#back-to-top-link{
+  font-size: 1.25rem;
+  @include styleLink(standard, $link_color, $link_color, $link_hover_color, $link_color);
+  float: right;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}

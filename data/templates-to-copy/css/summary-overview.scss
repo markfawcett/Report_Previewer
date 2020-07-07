@@ -1,0 +1,168 @@
+@import 'variables';
+@import 'mixins-fonts';
+@import 'cookie-banner';
+@import 'navbar-footer';
+@import 'components';
+@import 'tables';
+@import 'full-report-styles';
+
+
+/*BASE*/
+html{
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+body{
+  background-color: $grey_background;
+  font-family: 'National', Arial, Helvetica Neue, Helvetica, sans-serif;
+  color: $text_color;
+}
+
+/*TYPOGRAPHY*/
+h1{
+  @include font-face(semi);
+  font-size: 2.75rem;
+  line-height: 45px;
+  color: $purple;
+}
+
+h2{
+  @include font-face(standard);
+  font-size: 2.0625rem;
+  line-height: 36px;
+  color: $purple;
+}
+
+p{
+  @include font-face(standard);
+  color: $text_color;
+  font-size: 1.25rem;
+  line-height: 30px;
+  margin-top: 24px;
+}
+/*Links*/
+@include styleLink(standard, $link_color, $visited_link_color, $link_hover_color, $purple);
+
+
+/*REPORT BODY*/
+.report-body{
+  h2{
+    @include font-face(standard);
+    font-size: 1.6875rem;
+    line-height: 30px;
+    color: $text_color;
+  }
+  h3{
+    @include font-face(standard);
+    font-size: 1.375rem;
+    line-height: 25px;
+    color: $text_color;
+  }
+  ul {
+    list-style-type:square;
+    li{
+      padding: 1%;
+      font-size: 1.25rem;
+    }
+  }
+  ol{
+    li{
+      padding: 1%;
+      font-size: 1.25rem;
+    }
+    &.numbered-list{
+      list-style-type: decimal;
+    }
+    &.alphabetical-list{
+      list-style-type: lower-latin;
+    }
+  }
+  a.full-report-chapter-link{
+    font-size: 1.15rem;
+  }
+}
+
+/*Captions and source*/
+.figure-caption, .video-caption, .source{
+  @include font-face(standard);
+  font-size: 0.875rem;
+  margin:0;
+  line-height: 20px;
+  +div.callout{
+    margin-top: 20px;
+  }
+}
+.video-caption{
+  margin-top:20px;
+  margin-bottom: 20px;
+}
+
+hr{
+  margin-top: 20px;
+  margin-bottom: 16px;
+  border:0;
+  border-top: 1px solid $divider_color; 
+}
+
+/*CALLOUT*/
+.callout {
+  border: 1px solid $text_color;
+  border-left-width: 5px;
+  @include set_border_radius(5px);
+  &_default{
+    border-left-color: $purple;
+  } 
+  p{
+    margin:0;
+    padding: 10px;
+  }
+  +p{
+    margin-top: 20px;
+  }
+}
+
+/*BLOCKQUOTE*/
+blockquote{
+  border-left: 5px solid $purple;
+  p{
+    margin-top: -5px;
+  }
+}
+
+/*FOOTNOTE REFERENCE*/
+sup {
+  background-color: $focus_green;
+  padding: 1px;
+  top: -0.9em;
+  font-size: .7em;
+  a{
+    font-size:1.1em; 
+  }
+}
+
+/*IMAGES AND VIDEO*/
+img{
+  margin: 20px 0px 20px 0px;
+  width: 70%;//optional: depends on image quality.size
+  @include breakpoint(xs){
+    width: 100%;
+  }
+}
+
+/*Video Container*/
+.embed-responsive{
+  margin-top: 3%;
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,72 @@
+/*Page Test Notification*/
+#page-test-notification{
+  background-color: $faded_purple;
+  p{
+    color: $grey_background;  
+    line-height: 26px;  
+    font-size: 1rem;
+    margin-top: 0%;  
+    margin-bottom: 0px;
+  }
+  & > .container{
+    padding-top: 5px;
+    padding-bottom: 7px;
+  }
+  @include styleLink(standard, $grey_background, $grey_background, darken($grey_background,10%), $purple);
+}
+
+/*NAVBAR && FOOTER*/
+.navbar{
+  background-color: $purple;
+  border: none;
+  color: $white;
+  @include set_border_radius(0px);
+  &-nav{
+    @include breakpoint(xs){
+      margin-left: -15px;
+    }
+    margin-left: -30px;
+  }
+  & >.container{
+    padding-top: 15px;
+    padding-bottom: 17px;
+  }
+}
+
+/*PORTCULLIS CONTAINER*/
+.portcullis-container{
+  a:focus, a:active{
+    background: transparent;
+    outline: none;
+  }
+  a > svg:active, a > svg:focus{
+    background: $focus_green;
+    outline: none;
+  }
+}
+
+
+
+/*FOOTER*/
+footer{
+  background: $purple;
+  width: 100%;
+  padding-bottom: 35px;
+  @include set_box_sizing(border-box);
+  margin-top: 30px;
+  h2{
+    @include font-face(semi);
+    color: $white;
+    margin-top: 24px;
+    font-size: 1.125rem;
+  }
+  ul{
+    list-style-type:none;
+    padding: 0;
+    li {
+      margin-top: 10px;
+      font-size: 1.25rem;
+    }
+  }
+  @include styleLink(standard, $grey_background, $grey_background, darken($grey_background,10%), $purple);
+}

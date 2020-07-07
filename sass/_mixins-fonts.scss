@@ -1,0 +1,186 @@
+/*MIXINS*/
+@mixin set_border_radius($radius){
+  border-radius: $radius;
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  -ms-border-radius: $radius;
+  -o-border-radius: $radius;
+}
+
+@mixin set_box_sizing($value){
+  -webkit-box-sizing: $value;
+  -moz-box-sizing: $value;
+  box-sizing: $value;
+}
+
+/*Media Queries*/
+/*bootstrap breakpoints*/
+@mixin breakpoint($class) {
+  @if $class == xs {
+    @media (max-width: 767px) { @content; }
+  }
+
+  @else if $class == sm {
+    @media (min-width: 768px) { @content; }
+  }
+
+  @else if $class == md {
+    @media (min-width: 992px) { @content; }
+  }
+
+  @else if $class == lg {
+    @media (min-width: 1200px) { @content; }
+  }
+
+  @else {
+    @warn "Breakpoint mixin supports: xs, sm, md, lg";
+  }
+}
+
+/*Media queries between two screen sizes*/
+@mixin twoBreakpoints($min, $max){
+  @media (max-width: $max+'px') and (min-width: $min+'px'){
+    @content;
+  }
+}
+
+/*other breakpoints*/
+@mixin custom_breakpoint($value){
+  @media (max-width:$value+'px'){
+    @content;
+  }
+}
+
+/*IE Exceptions*/
+@mixin IEexceptions(){
+  @media all and (-ms-high-contrast: none), (-ms-high-contrast:active){
+    @content;
+  }
+}
+
+/*FONTS*/
+@font-face {
+  font-family: 'National';
+  src: url('../fonts/National-LFS-Book.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'National';
+  src: url('../fonts/National-LFS-Semibold.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@mixin font-face($font-weight){
+  @if $font-weight == standard {
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  @else if $font-weight == semi {
+    font-weight: 200;
+    font-style: normal;
+  }
+
+  @else if $font-weight == italics {
+    font-weight: 500;
+    font-style: italic;
+  }
+}
+
+
+// New fonts for print css
+// Roman
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+// Italics
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Parliament';
+  src: url('../fonts/Parliament-Semibolditalic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+}
+
+@mixin font-parli($font-style){
+  @if $font-style == roman {
+    font-family: "Parliament";
+    font-weight: 400;
+    font-style: normal;
+  }
+  @else if $font-style == semi {
+    font-family: "Parliament";
+    font-weight: 600;
+    font-style: normal;
+  }
+  @else if $font-style == bold {
+    font-family: "Parliament";
+    font-weight: 700;
+    font-style: normal;
+  }
+  @else if $font-style == italic {
+    font-family: "Parliament";
+    font-weight: 400;
+    font-style: italic;
+  }
+  @else if $font-style == semiitalic {
+    font-family: "Parliament";
+    font-weight: 600;
+    font-style: italic;
+  }
+  @else if $font-style == bolditalic {
+    font-family: "Parliament";
+    font-weight: 700;
+    font-style: italic;
+  }
+}
+
+@mixin styleLink($font, $linkColor, $visitedLinkColor, $linkHoverColor, $activeFocusLinkColor){
+  a{
+    @include font-face($font);
+    color: $linkColor;
+    text-decoration:underline;
+    background-color: transparent;
+    &:visited{
+      color: $visitedLinkColor;
+    }
+    &:hover{
+      color: $linkHoverColor;
+    }
+    &:active, &:focus{
+      background-color: $focus_green;
+      text-decoration: none;
+      color: $activeFocusLinkColor;
+    }
+  }
+}

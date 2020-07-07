@@ -1,0 +1,73 @@
+//TABLES
+table{
+  margin: 2% auto;
+  float: none;
+  td{
+    font-size: 1.25rem;
+  }
+  &.table-bordered{
+    border: 1px solid #ddd;
+  }
+  &.table-striped{
+    thead tr td{
+      background:$grey_background;
+    }
+    tr:nth-child(odd){
+      background: $table_striped_color;
+    }
+  }
+  &.header-cell{
+    thead{
+      tr td p{
+        @include font-face(semi);
+      }
+    }
+  }
+}
+
+//Formal Minutes table
+.formal-minutes-table{  
+  width: 80%;
+  tbody{
+    td{
+      text-align: center;
+      padding: .5em;
+    }
+    tr:nth-child(odd){
+      background: $table_striped_color;
+    }
+  }
+  @include breakpoint(xs){
+    width: 100%;
+  }
+}
+
+//Witness Table
+.witness-table{
+  tbody{
+    tr td{
+      width: 90%;
+      p{
+        margin-top: 10px;
+      }
+    }
+  }
+}
+
+//Past Reports Table
+.past-reports-table{
+  tbody{
+    tr{
+      td{
+        width: 20%;
+      }
+      td+td{
+        width: 60%;
+      }
+      p{
+        margin-top: 10px;
+      }
+    }
+   
+  }
+}

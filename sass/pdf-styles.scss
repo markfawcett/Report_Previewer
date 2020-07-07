@@ -1,0 +1,290 @@
+
+// padding from left and right margins
+$pagepadding: 16mm;
+// westminster white
+$westminsterwhite: #EDEBEA;
+// tracking - not respected in oxygen chemistry
+$tracking: 1px;
+
+@media print{
+  // change the base font size
+  html{
+    font-size: 13.25pt;
+    line-height: 1.2;
+  }
+  // disable gray background
+  body{
+    background: transparent !important;;
+  }
+  #hide-nav, #page-test-notification{
+    display: none;
+  }
+  // #report-title{
+  //   color: $purple !important;
+  //   padding: 20px 0 25px 0;
+  //   margin-top: 50px;
+  //   border-top: 5px solid $purple;
+  //   border-bottom: 5px solid $purple;
+  // }
+
+  // padding from margins
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  div.svg-box,
+  hr.thick,
+  .svg-box,
+  .recommendations-container{
+  // .container{
+    margin-left: $pagepadding;
+    margin-right: $pagepadding;
+    // padding-left: $pagepadding;
+    // padding-right: $pagepadding;
+  }
+  div.image-container{
+    margin-left: $pagepadding;
+    margin-right: $pagepadding;
+    // padding-left: $pagepadding;
+    // padding-right: $pagepadding;
+  }
+
+  // remove margin for figures and captions
+  // .img-responsive{
+  //   margin-left: -$pagepadding;
+  //   margin-right: -$pagepadding;
+  //   // margin-top: 7.5mm;
+  //   // margin-bottom: 7.5mm;
+  // }
+
+  /*TYPOGRAPHY*/
+  h1{
+    @include font-face(semi);
+    font-size: 22pt;
+    line-height: 1.2;
+    color: $purple;
+  }
+
+  h2{
+    @include font-face(standard);
+    font-size: 15pt;
+    line-height: 1.4;
+    color: $purple;
+  }
+
+  p, li{
+    @include font-face(standard);
+    color: $text_color;
+    font-size: 1rem;
+    // font-size: 1.2rem;
+    line-height: 1.2;
+    margin-top: 5.5mm;
+    margin-bottom: 5.5mm;
+  }
+  .parliament-bold{
+    @include font-parli(bold);
+    text-align: center;
+  }
+  h2.parliament-bold{
+    @include font-parli(bold);
+    font-size: 32pt;
+    line-height: 1.2;
+    color: $purple;
+    padding-top: 20mm;
+    margin-bottom: 20mm;
+  }
+  .report-body h2{
+    font-size: 32pt;
+    line-height: 1.2;
+  }
+
+  .report-body h3{
+    font-size: 17pt;
+    padding-top: 5mm;
+    padding-bottom: 3mm;
+  }
+
+  hr.thick{
+    border-top: 6px solid $purple;
+  }
+  // redefine paragraph sizing
+  // p{
+  //   font-size: 1rem;
+  //   line-height: 1.15;
+  // }
+  // #report-title:after{
+  //   content: "random date";
+  // }
+
+  // headings
+  #committee-name, #report-published-date{
+    @include font-parli(semi);
+    margin-top: 80px;
+  }
+  #report-published-date{
+  }
+  .report-body .contents-heading{
+    color: $purple;
+    @include font-parli(roman);
+    text-align: center;
+  }
+
+
+  // title-caption
+  .title-caption{
+    font-size: 12pt;
+    color: $purple;
+    margin-bottom: 80px;
+  }
+
+  // test removing margin around immage
+  .svg-box>img{
+    width: 100%;
+  }
+  // div.svg-box, div.svg-box>img{
+  //   margin: 0;
+  // }
+  .recommendations-container p,
+  .recommendations-container h1,
+  .recommendations-container h2,
+  .recommendations-container h3,
+  .recommendations-container h4,
+  .recommendations-container h5,
+  .recommendations-container h6{
+    margin-left: 0;
+    margin-right: 0;
+  }
+  p.figure-caption{
+    text-transform: uppercase;
+    color: $purple;
+    background-color: $westminsterwhite;
+    text-align: center;
+    line-height: 1.2;
+    font-size: 11pt;
+    font-weight: 200;
+    letter-spacing: $tracking;
+    padding-top: 3mm;
+    padding-left: 5mm;
+    padding-right: 5mm;
+    padding-bottom: 3mm;
+    margin-bottom: 7.5mm;
+    page-break-after: avoid;
+  }
+  //  if the caption appears after a figure it takes a different style
+  div.image-container + p.figure-caption{
+  // .img-responsive + p.figure-caption{
+    text-transform: none;
+    font-size: 8pt;
+    color: $text_color;
+    text-align: left;
+    letter-spacing: 0;
+    font-weight: 500;
+    padding-left: 5mm;
+    padding-right: 5mm;
+    margin-top: 7.5mm;
+    page-break-before: avoid;
+    page-break-after: auto;
+    line-height: 1.2;
+  }
+  p.figure-caption, p.video-caption, p.source{
+    margin-left: 0;
+    margin-right: 0;
+  }
+    // the font size of the source was a bit small on the print out
+  /*Captions and source*/
+  p.video-caption, p.source{
+    font-size: 1rem;
+    // Paragraphs with these classes are used for both before and
+    // after the content they relate to.
+    // Try to avaid breaking before and after these
+    // (This doesnt work in a lot of browsers)
+    page-break-after: avoid;
+    page-break-before: avoid;
+  }
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  .recommendations-container{
+    margin-bottom: 5.5mm;
+    margin-top: 5.5mm;
+    padding-top: 1.2em;
+    padding-bottom: 1.2em;
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+  }
+  .recommendations-container p{
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .recommendations-container p+p{
+    margin-top: 1em;
+    // margin-bottom: 1em;
+  }
+  .recommendations-container h3{
+    padding: 0;
+    margin-top: 0;
+    // padding-top: 0;
+    margin-bottom: 0;
+    // padding-bottom: 0;
+    font-size: 9.5pt;
+    letter-spacing: $tracking;
+    line-height: 1;
+    font-weight: 200;
+    text-transform: uppercase;
+  }
+  .recommendations-container h3+p{
+    margin-top: 0;
+  }
+
+  .report-body ul li {
+    list-style-position: outside;
+    padding-left: 15px;
+    // font-size: 1.25rem;
+    // line-height: 1.75rem;
+  }
+}
+
+
+
+@page {
+  size: A4;
+  margin-bottom: 24mm;
+  margin-left: 16mm;
+  margin-right: 16mm;
+  margin-top: 24mm;
+  @bottom-center {
+    content: counter(page, lower-roman);
+    font-family: 'National';
+    color: $purple;
+    font-size: 8pt;
+    @include font-face(standard);
+  }
+}
+
+@page :first{
+  @bottom-center {
+    content: none;
+  }
+}
+
+
+// oxygen chemistry needs the following
+td[colspan] {
+    table-column-span: attr(colspan, integer);
+}
+td[rowspan] {
+    table-row-span: attr(rowspan, integer);
+}
+
+colgroup{
+  display: none;
+}
+
+table{
+  width: 100%;
+}

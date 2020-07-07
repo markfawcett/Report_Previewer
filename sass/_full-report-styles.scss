@@ -1,0 +1,33 @@
+/*FULL REPORT EXTRA STYLES*/
+ul.recommendation-list, strong{
+  @include font-face(semi);
+}
+
+//written evidence list
+#written-evidence-list{
+  font-size: 1.25rem;
+  li{
+    margin-top: 1rem;
+  }
+}
+
+/*footnote container*/
+.footnote-container{
+  p{
+    font-size: 1rem;
+  }
+}
+
+/*inquiry information heading*/
+h2.inquiry-information-heading{
+  font-size: 2.5em;
+  margin-top: 4%;
+  &.first{
+    margin-top: 8%;
+  } 
+}
+
+/*caption heading*/
+p.caption-heading{
+  @include font-face(semi);
+}
