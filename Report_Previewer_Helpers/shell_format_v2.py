@@ -12,7 +12,7 @@ def insert_html_into_new_shell(injection):
     # print('Path to shell:')
     # print(path_to_shell)
     new_shell = html.parse(path_to_shell).getroot()
-    entryPoint = new_shell.cssselect('[id=report-body]')[0]
+    entryPoint = new_shell.xpath('//*[@id="report-body"]')[0]
     entryPoint.append(injection)
     entryPoint.getchildren()[0].drop_tag()
     return(new_shell)
@@ -20,7 +20,7 @@ def insert_html_into_new_shell(injection):
 
 def add_col_row_divs(htmlRoot):
     # Add 'row' and 'col-md-9' divs to h2 sections
-    h2s = htmlRoot.cssselect("h2")
+    h2s = htmlRoot.xpath('//h2')
     for h2 in h2s:
         row_div = h2.makeelement('div', {'class': 'row'})
         col_div = h2.makeelement('div', {'class': 'col-md-9'})
@@ -43,7 +43,7 @@ def add_col_row_divs(htmlRoot):
 
 def add_ids_for_headings(htmlRoot):
     # Add ids for headings in contents
-    h2s = htmlRoot.cssselect('h2')
+    h2s = htmlRoot.xpath('//h2')
     for h2 in h2s:
         if 'id' in h2.attrib:
             pass
@@ -60,54 +60,62 @@ def add_meta(file, page, meta):
 
     try:
         if page == 'summary':
-            file.cssselect('#report-title')[0].text = meta['report_title'] + ' – Report Summary'
+            xpath = '//*[@id="report-title"]'
+            file.xpath(xpath)[0].text = meta['report_title'] + ' – Report Summary'
         elif page == 'report':
-            file.cssselect('#report-title')[0].text = meta['report_title']
+            xpath = '//*[@id="report-title"]'
+            file.xpath(xpath)[0].text = meta['report_title']
     except:
         pass
 
 
     try:
+        p_ele  = file.find('.//*[@id="full-report-link-container"]//p')
+        pa_ele = file.find('.//*[@id="full-report-link-container"]//p//a')
         if page == 'summary':
-            file.cssselect('#full-report-link-container p')[0].text   = 'This is the report summary, '
-            file.cssselect('#full-report-link-container p a')[0].text = 'read the full report'
-            file.cssselect('#full-report-link-container p a')[0].set('href', 'full-report.html')
+            p_ele.text  = 'This is the report summary, '
+            pa_ele.text = 'read the full report'
+            # TODO: make full report and report summary link to each other
+            pa_ele.set('href', 'full-report.html')
 
         elif page == 'report':
-            file.cssselect('#full-report-link-container p')[0].text   = 'This is the full report, '
-            file.cssselect('#full-report-link-container p a')[0].text = 'read the report summary'
-            file.cssselect('#full-report-link-container p a')[0].set('href', 'report-summary.html')
+            p_ele.text   = 'This is the full report, '
+            pa_ele.text = 'read the report summary'
+            pa_ele.set('href', 'report-summary.html')
     except:
         pass
 
 
     try:
+        report_number_ele = file.find('.//*[@id="report-number"]')
         if page == 'summary':
-            file.cssselect('#report-number')[0].drop_tree()
+            report_number_ele.drop_tree()
         elif page == 'report':
-            file.cssselect('#report-number')[0].text = meta['report_number'] + ' ' + meta['report_type'] + ' of Session 2017-19'
+            report_number_ele.text = f"{meta['report_number']} {meta['report_type']} of Session 2017-19"
     except:
         feedback.warning('Report Number and Type not added to the output.')
     try:
-        file.cssselect('#report-author')[0].getnext().text = meta['committee_name']
-        file.cssselect('#report-author')[0].getnext().attrib['title'] = meta['committee_name'] + ' website'
-        file.cssselect('#report-author')[0].getnext().attrib['href'] = meta['committee_address']
+        report_author_ele = file.find('.//*[@id="report-author"]')
+        report_author_ele.getnext().text = meta['committee_name']
+        report_author_ele.getnext().set('title',  meta['committee_name'] + ' website')
+        report_author_ele.getnext().set('href',  meta['committee_address'])
 
     except:
         feedback.warning('Committee name not added to author line in output.')
+
     try:
-        file.cssselect('#report-publication-date')[0].tail = ' ' + meta['publication_date']
+        file.find('.//*[@id="report-publication-date"]').tail = ' ' + meta['publication_date']
     except:
         feedback.warning('Publication Date not added to the output.')
 
     try:
-        file.cssselect('#witness-heading-link')[0].attrib['href'] = meta['inquiry_publications']
-        file.cssselect('#writEv-heading-link')[0].attrib['href'] = meta['inquiry_publications']
+        file.find('.//*[@id="witness-heading-link"]').set('href', meta['inquiry_publications'])
+        file.find('.//*[@id="writEv-heading-link"]').set('href', meta['inquiry_publications'])
     except:
         feedback.warning('Inquiry Publications not added to the output.')
 
     try:
-        file.cssselect('#pastRep-heading-link')[0].attrib['href'] = meta['committee_publications']
+        file.find('.//*[@id="pastRep-heading-link"]').set('href', meta['committee_publications'])
     except:
         feedback.warning('Committee publications not added to the output.')
 
