@@ -190,26 +190,6 @@ def process_html(html_path, **kwargs):
     )
     roubust_execution(funcs, input_html)
 
-    # elif source == "ID":
-    #     funcs = (
-    #         univ_html.drop_head,
-    #         univ_html.add_footnote_heading,
-    #         univ_html.size_images,
-    #         id_html.fix_ordered_lists,
-    #         univ_html.tidy_cycle,
-    #         id_html.fix_footnotes,
-    #         id_html.fix_footnote_refs,
-    #         id_html.remove_nonfootnote_divs,
-    #         # drop_cover must go after removing divs and before classes are changed
-    #         univ_html.drop_cover,
-    #         univ_html.convert_box_tables,
-    #         [triplets.map_classes_and_tags, [source]],
-    #         # univ_html.add_rules,  # must be after the triplets
-    #         univ_html.fix_blockquotes,
-    #         univ_html.correct_internal_links,
-    #     )
-    #     roubust_execution(funcs, input_html)
-
     # final functions are the same regardless of source
     funcs = ([univ_html.keep_only_accepted_classes, accepted_classes],
              univ_html.tidy_cycle,
@@ -233,7 +213,7 @@ def process_html(html_path, **kwargs):
     if summary is not None:
         print('\nCreating summary')
         summary = shell_format.add_meta(summary, 'summary', meta)
-        file_io.write_html(summary, base_file_name + '-report-summary.html', open_in_browser=False)
+        file_io.write_html(summary, base_file_name + '-report-summary.html', open_in_browser=True)
 
         # lets also have a go at creating a print-summary
         import Report_Previewer_Helpers.print_summary as print_summary
