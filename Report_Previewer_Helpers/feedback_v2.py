@@ -24,13 +24,13 @@ class bcolors:
 # Functions
 def warning(msg):
 
-    print(f'{bcolors.WARNING}WARNING:  {msg} {bcolors.ENDC}')
+    print(f'{bcolors.WARNING}WARNING:{bcolors.ENDC}  {msg}')
     # messagebox.showerror("Error", error_text)
 
 
 def error(msg):
 
-    print(f'{bcolors.FAIL}EORROR:  {msg} {bcolors.ENDC}')
+    print(f'{bcolors.FAIL}EORROR:{bcolors.ENDC}  {msg}')
     if 'tkinter' in sys.modules:
         import tkinter as tk
         from tkinter import messagebox

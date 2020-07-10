@@ -3,18 +3,18 @@
 # The following file paths are check on start-up as they
 # are required for the application to run
 REQUIRED = {
-    'templates_dir': 'script_resources/templates-to-copy',
-    'shell': 'script_resources/templates-to-use/shell.html',
-    'print_shell': 'script_resources/templates-to-use/printShell.html',
-    'pastRepText': 'script_resources/templates-to-use/pastRepText.html',
-    'witnessText': 'script_resources/templates-to-use/witnessText.html',
-    'writEvText': 'script_resources/templates-to-use/writEvText.html',
-    # 'templates_dir': 'templates-to-copy',
-    # 'shell': 'templates-to-use/shell.html',
-    # 'print_shell': 'templates-to-use/printShell.html',
-    # 'pastRepText': 'templates-to-use/pastRepText.html',
-    # 'witnessText': 'templates-to-use/witnessText.html',
-    # 'writEvText': 'templates-to-use/writEvText.html',
+    # 'templates_dir': 'script_resources/templates-to-copy',
+    # 'shell': 'script_resources/templates-to-use/shell.html',
+    # 'print_shell': 'script_resources/templates-to-use/printShell.html',
+    # 'pastRepText': 'script_resources/templates-to-use/pastRepText.html',
+    # 'witnessText': 'script_resources/templates-to-use/witnessText.html',
+    # 'writEvText': 'script_resources/templates-to-use/writEvText.html',
+    'templates_dir': 'templates-to-copy',
+    'shell': 'templates-to-use/shell.html',
+    'print_shell': 'templates-to-use/printShell.html',
+    'pastRepText': 'templates-to-use/pastRepText.html',
+    'witnessText': 'templates-to-use/witnessText.html',
+    'writEvText': 'templates-to-use/writEvText.html',
 }
 
 

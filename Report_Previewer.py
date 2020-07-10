@@ -101,8 +101,8 @@ def on_created(event):
         print(f'One of the expected parameters {expected_args} not found in file {str(parameters_file)}')
     else:
         c_name = parameters['committee_name']
-        parameters['committee_address'] = st.COMMITTEES_AND_ADDRESSES[c_name][0]
-        parameters['committee_publications'] = st.COMMITTEES_AND_ADDRESSES[c_name][1]
+        parameters['committee_address'] = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])[0]
+        parameters['committee_publications'] = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])[1]
 
     process_html(str(html_file), **parameters)
 
@@ -249,6 +249,7 @@ def process_html(html_path, **kwargs):
 
 if __name__ == "__main__":
     try:
+        os.system('color')  # coloured text in windows cmd prompt
         main()
     except Exception:
         print("Exception in user code:\n")
