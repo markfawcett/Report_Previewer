@@ -8,11 +8,6 @@ import sys
 import time
 import traceback
 
-# needed for pyinstaller
-# import distutils
-
-# import tkinter
-
 # Import third-party modules
 from lxml import html  # type: ignore
 from watchdog.observers import Observer  # type: ignore
@@ -32,8 +27,6 @@ try:
     # import Report_Previewer_Helpers.cli_interface2   as cli
 except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
-
-
 
 
 def roubust_execution(funcs, input_html):
@@ -64,18 +57,21 @@ def wait_for_file(file):
 
 
 def on_created(event):
-    print(f"{event.src_path} has been created!")
     html_file = Path(event.src_path)
 
     # wait for file to finish being created/copied
     wait_for_file(html_file)
-    print('File creation finished.')
+    print(f"File created: {event.src_path}")
 
     parameters_file = html_file.parent.joinpath('parameters.txt')
     print(f'Looking for {str(parameters_file)}')
-    if not parameters_file.exists:
-        print(f'ERROR there is no parameters file associated with {str(html_file)}')
+
+    if not parameters_file.exists():
+        feedback.error(f'there is no parameters file associated with  {str(html_file.name)}'
+                       '\nthe parameters file is required and is expected to be saved in the following folder:'
+                       f'\n{html_file.parent}')
         return
+
     wait_for_file(parameters_file)
 
     parameters = {}
@@ -85,6 +81,8 @@ def on_created(event):
             # skip blank lines
             if not line.strip():
                 continue
+
+            print(line)
 
             key_value = line.split('\t')
             if len(key_value) != 2:
@@ -106,9 +104,9 @@ def on_created(event):
 
     process_html(str(html_file), **parameters)
 
-    # i wonder if we should now delete both parameters.txt and the html_file
-    os.remove(html_file)
-    os.remove(parameters_file)
+    # I wonder if we should now delete both parameters.txt and the html_file
+    html_file.unlink(missing_ok=True)  # deletes the file
+    parameters_file.unlink(missing_ok=True)
 
 
 def main():
@@ -118,10 +116,11 @@ def main():
     # create event handler for watched folder
     patterns = ["*.htm", '*.html']
     ignore_patterns = ['*.txt', '*$*']
-    ignore_directories = True
-    case_sensitive = True
+
+
     event_handler = PatternMatchingEventHandler(patterns, ignore_patterns,
-                                                ignore_directories, case_sensitive)
+                                                ignore_directories=True,
+                                                case_sensitive=True)
     event_handler.on_created = on_created
 
     # create cross platform path to folder to watch
@@ -135,6 +134,7 @@ def main():
     my_observer = Observer()
     my_observer.schedule(event_handler, path, recursive=False)  # not interested in sub-directories
 
+    print('Waiting for files to be added to:\n{}\n'.format(watched_folder))
     my_observer.start()
     try:
         while True:
@@ -195,8 +195,8 @@ def process_html(html_path, **kwargs):
              univ_html.tidy_cycle,
              univ_html.generic_clean,
              univ_html.tidy_cycle,  # deliberately repeated
-             univ_html.free_img,   # must be before add rules
-             univ_html.add_rules,  # must be after the triplets
+             univ_html.free_img,    # must be before add rules
+             univ_html.add_rules,   # must be after the triplets
              # univ_html.add_back_to_top,
              univ_html.no_toc_footnote_heading,
              univ_html.replace_back_pages)
