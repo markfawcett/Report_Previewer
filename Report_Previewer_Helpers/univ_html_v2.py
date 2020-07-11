@@ -1,50 +1,55 @@
 # from copy import deepcopy
 import re
 
-from lxml import html
+from lxml import html  # type: ignore
+# from lxml.etree import iselement  # type: ignore
 
 from .settings import REQUIRED as Required
-#### Constants
-PARAGRAPH_TAGS = ['p' , 'h1', 'h2', 'h3', 'h4']
+# ### Constants
+PARAGRAPH_TAGS = ['p', 'h1', 'h2', 'h3', 'h4']
 INLINE_TAGS = ['em', 'strong', 'span', 'a']
 
 
-def drop_head (htmlRoot):
-    htmlRoot.cssselect("head")[0].drop_tree()
-    htmlRoot.cssselect("body")[0].drop_tag()
+def drop_head(htmlRoot):
+    htmlRoot.find("head").drop_tree()
+    htmlRoot.find("body").drop_tag()
     return (htmlRoot)
 
-def drop_cover (htmlRoot):
-    elements = htmlRoot.cssselect('*[class=Heading1]') + htmlRoot.cssselect('*[class=ChapterHeading1]') + htmlRoot.cssselect('*[class=SummaryHeading]')
+def drop_cover(htmlRoot):
+    xpath = '//*[@class="Heading1"] | //*[@class="ChapterHeading1"] | //*[@class="SummaryHeading"]'
+    elements = htmlRoot.xpath(xpath)
     for element in elements:
         if str(element.text_content()).strip() == 'Summary':
-            siblingIterator = element.itersiblings(preceding = True)
+            siblingIterator = element.itersiblings(preceding=True)
             for sibling in siblingIterator:
                 sibling.drop_tree()
             break
-    return(htmlRoot)
+    return htmlRoot
 
-def drop_unwanted_attributes (htmlRoot, attribute_list):
-    ## remove unwanted attributes added by Word
+def drop_unwanted_attributes(htmlRoot, attribute_list):
+    # remove unwanted attributes added by Word
     for attribute in attribute_list:
-        elements = htmlRoot.cssselect("[" + attribute + "]")
+        # elements = htmlRoot.cssselect("[" + attribute + "]")
+        elements = htmlRoot.xpath(f'//*[@{attribute}]')
         for element in elements:
             element.attrib.pop(attribute)
-    return(htmlRoot)
+    return htmlRoot
 
-def drop_pointless_tags (htmlRoot, pointlessTags):
-    all_elements = htmlRoot.cssselect("*")
+def drop_pointless_tags(htmlRoot, pointlessTags):
+    # all_elements = htmlRoot.cssselect("*")
+    all_elements = htmlRoot.iter()  # should be a bit faster
     for element in all_elements:
         if element.tag in pointlessTags:
             if len(element.attrib) == 0:
                 element.drop_tag()
-    return(htmlRoot)
+    return htmlRoot
 
 def size_images(htmlRoot):
-    images = htmlRoot.cssselect('img')
+    # images = htmlRoot.cssselect('img')
+    images = htmlRoot.xpath('//img')
     for image in images:
-        image.attrib['width'] = "100%"
-    return(htmlRoot)
+        image.set('width', "100%")
+    return htmlRoot
 
 
 def free_img(htmlRoot):
@@ -64,32 +69,29 @@ def free_img(htmlRoot):
 
 def add_rules(htmlRoot):
     captions = htmlRoot.xpath('//p[@class="figure-caption"]')
-    elements_of_interest = ('img', 'table', 'div')
+    tags_of_interest = ('img', 'table', 'div')
 
     for caption in captions:
         try:
-            next_element = caption.getnext()
-            # print('Next element:\t', html.tostring(next_element), '\n')
+            next_ = caption.getnext()
+            # print('Next element:\t', html.tostring(next_), '\n')
             # print('This elemebnt:\t', html.tostring(caption), '\n')
-            previous_element = caption.getprevious()
-            # print('Previous element:\t', html.tostring(previous_element), '\n')
+            previous = caption.getprevious()
+            # print('Previous element:\t', html.tostring(previous), '\n')
 
-            if next_element is not None:
+            if next_ is not None:
 
                 # also add rule before captions
-                if (next_element.tag in elements_of_interest and
-                   previous_element not in captions):
+                if next_.tag in tags_of_interest and previous not in captions:
+                    caption.addprevious(html.Element('hr'))
 
-                        caption.addprevious(html.Element('hr'))
+            if previous is not None:
 
-            if previous_element is not None:
+                if previous.tag in tags_of_interest and next_ not in captions:
+                    caption.addnext(html.Element('hr'))
 
-                if (previous_element.tag in elements_of_interest and
-                   next_element not in captions):
-                        caption.addnext(html.Element('hr'))
-
-                if (len(previous_element) > 0 and previous_element[0].tag in elements_of_interest and
-                   next_element not in captions):
+                if (len(previous) > 0 and previous[0].tag in tags_of_interest and
+                   next_ not in captions):
                         caption.addnext(html.Element('hr'))
         except:
             pass
@@ -97,27 +99,27 @@ def add_rules(htmlRoot):
     return htmlRoot
 
 
-def fix_blockquotes (htmlRoot):
+def fix_blockquotes(htmlRoot):
 
-    ### Change p-quote to blockquote
-    quotes = htmlRoot.cssselect('p[class=Quote]') + htmlRoot.cssselect('p[class=MsoQuote]')
+    # Change p-quote to blockquote
+    # quotes = htmlRoot.cssselect('p[class=Quote]') + htmlRoot.cssselect('p[class=MsoQuote]')
+    xpath = '//p[@class="Quote"] | //p[@class="MsoQuote"]'
+    quotes = htmlRoot.xpath(xpath)
     for quote in quotes:
         if quote.getparent().tag == 'td':
             pass
         else:
             quote.tag = 'blockquote'
 
-    elements = htmlRoot.cssselect('blockquote')
+    elements = htmlRoot.xpath('//blockquote')
     for element in elements:
         try:
             if element.getprevious().tag == 'blockquote' or element.getprevious().tag == 'blockquote-subsequent':
                 element.tag = 'blockquote-subsequent'
-            else:
-                pass
         except:
             pass
 
-    elements = htmlRoot.cssselect('blockquote')
+    elements = htmlRoot.xpath('//blockquote')
     for element in elements:
         group = [element]
         element.tag = 'p'
@@ -139,7 +141,7 @@ def fix_blockquotes (htmlRoot):
         for listItem in group:
             myBlock.append(listItem)
 
-    return(htmlRoot)
+    return htmlRoot
 
 
 # use sets instead.
@@ -156,7 +158,7 @@ def fix_blockquotes (htmlRoot):
 
 # Some elements (like tales) take multiple, space separated, classes.
 def keep_only_accepted_classes(htmlRoot, accepted_classes):
-    elements_with_class = htmlRoot.cssselect('*[class]')
+    elements_with_class = htmlRoot.xpath('//*[@class]')
 
     for element in elements_with_class:
         element_classes = element.get('class', default='').split(' ')
@@ -181,12 +183,12 @@ def keep_only_accepted_classes(htmlRoot, accepted_classes):
 #                 element.attrib.pop('class')
 #         except:
 #             pass
-#     return(htmlRoot)
+#     return htmlRoot
 
-def tidy_cycle (htmlRoot):
-## Removes empty tags that have no function
+def tidy_cycle(htmlRoot):
+    # Removes empty tags that have no function
 
-    def attempt_drop_tree (element):
+    def attempt_drop_tree(element):
         try:
             element.drop_tree()
             nonlocal repeat
@@ -195,7 +197,7 @@ def tidy_cycle (htmlRoot):
             pass
 
 
-    def attempt_drop_tag (element):
+    def attempt_drop_tag(element):
         try:
             element.drop_tag()
             nonlocal repeat
@@ -209,36 +211,38 @@ def tidy_cycle (htmlRoot):
 
         repeat = False
 
-        #### Part One
-        all_elements = htmlRoot.cssselect("*")
+        # ### Part One
+        # all_elements = htmlRoot.cssselect("*")
+        all_elements = htmlRoot.iter()
         for element in all_elements:
 
             if element.getchildren() == []:
 
-                ## remove textless, childless inline tags
+                # remove textless, childless inline tags
                 if element.tag in INLINE_TAGS:
-                    if str(element.text_content())=="":
-                        attempt_drop_tree (element)
+                    if str(element.text_content()) == "":
+                        attempt_drop_tree(element)
                         repeat = True
 
-                ## remove textless, childless paragraph tags
+                # remove textless, childless paragraph tags
                 elif element.tag in PARAGRAPH_TAGS:
                     if re.fullmatch(r'\s*', str(element.text_content())) != None:
-                        attempt_drop_tree (element)
+                        attempt_drop_tree(element)
                         repeat = True
 
-                ## remove childless div tags
+                # remove childless div tags
                 elif element.tag == 'div':
-                    attempt_drop_tree (element)
+                    attempt_drop_tree(element)
                     repeat = True
 
 
-        #### Part Two
-        ## drop tags that have no attributes and that are pointless without attributes
-        drop_pointless_tags (htmlRoot, ['span','a'])
+        # ### Part Two
+        # drop tags that have no attributes and that are pointless without attributes
+        drop_pointless_tags(htmlRoot, ['span', 'a'])
 
-        #### Part Three - remove redundant immediate tag repetition
-        all_elements = htmlRoot.cssselect("*")
+        # ### Part Three - remove redundant immediate tag repetition
+        # all_elements = htmlRoot.cssselect("*")
+        all_elements = htmlRoot.iter()
         for element in all_elements:
             try:
                 parent = element.getparent()
@@ -248,43 +252,34 @@ def tidy_cycle (htmlRoot):
             except:
                 pass
 
-        ## Remove empty attributes that have no purpose if empty
-        for pointless_attribute in ['title', 'class', 'id']:
-            all_elements = htmlRoot.cssselect("*[" + pointless_attribute + "]")
+        # Remove empty attributes that have no purpose if empty
+        for pointless_attribute in 'title', 'class', 'id':
+            all_elements = htmlRoot.xpath(f'//*[@{pointless_attribute}]')
             for element in all_elements:
                 if element.attrib[pointless_attribute] == "":
                     element.attrib.pop(pointless_attribute)
                     repeat = True
 
-        ## Remove whitespace at the end of paragraph tags
-        all_elements = htmlRoot.cssselect("*")
-
-##        try:
-        for element in all_elements:
+        # Remove whitespace at the end of paragraph tags
+        for element in htmlRoot.iter():
             if element.tag in PARAGRAPH_TAGS:
-                if element.getchildren() == None or element.getchildren() == []:
-                    if element.text != None:
+                if element.getchildren() is None or element.getchildren() == []:
+                    if element.text:
                         element.text = element.text.rstrip()
                         repeat = True
                 else:
                     last_child = element.getchildren()[-1]
-                    if last_child.tail != None:
+                    if last_child.tail:
                         last_child.tail = last_child.tail.rstrip()
                         repeat = True
-##        except:
-##            pass
 
-
-
-        ##Tried to switch two non-breaking spaces for a horizontal tab but can't do it at this level. html.tostring is used later and doesn't interpret horizontal tab as we would want.
-        all_elements = htmlRoot.cssselect("*")
-
+        # #Tried to switch two non-breaking spaces for a horizontal tab but can't do it at this level. html.tostring is used later and doesn't interpret horizontal tab as we would want.
         try:
-            for element in all_elements:
-                if element.text != None and element.text.find('\xa0\xa0') != -1:
+            for element in htmlRoot.iter():
+                if element.text and element.text.find('\xa0\xa0') != -1:
                     element.text = str(element.text).replace('\xa0\xa0', '\xa0')
                     repeat = True
-                if element.tail != None and element.tail.find('\xa0\xa0') != -1:
+                if element.tail and element.tail.find('\xa0\xa0') != -1:
                     element.tail = str(element.tail).replace('\xa0\xa0', '\xa0')
                     repeat = True
         except:
@@ -295,7 +290,7 @@ def tidy_cycle (htmlRoot):
 
 def generic_clean(htmlRoot):
 
-    paragraphTags = ['p' , 'h1', 'h2', 'h3', 'h4', 'h5']
+    paragraphTags = ['p', 'h1', 'h2', 'h3', 'h4', 'h5']
     blocksWithoutInlines = ['html', 'head', 'body', 'title', 'meta', 'link', 'script', 'hr', 'col', 'colgroup', 'tr', 'svg', 'polygon', 'g', 'table', 'img', 'path', 'tbody']
     blocksWithInlines = ['div', 'blockquote', 'nav', 'footer', 'td', 'ul', 'ol', 'li', 'button']
     blockTags = paragraphTags + blocksWithoutInlines + blocksWithInlines
@@ -303,46 +298,46 @@ def generic_clean(htmlRoot):
     allKnownTags = blockTags + inlineTags
     unknownTags = set()
 
-    allElements = htmlRoot.cssselect('*')
+    allElements = htmlRoot.xpath('//*')
     counter = 0
     for e in allElements:
-        ## Unknown tags record to error file for JB review
+        # Unknown tags record to error file for JB review
         if e.tag not in allKnownTags:
             unknownTags.add(e.tag)
 
-    ##    ## Could potentially remove tail entirely in some cases but perhaps risky for no real benefit
-    ##    if e.tag in blockTags and e.tail != None:
-    ##        e.tail = None
+    #    # Could potentially remove tail entirely in some cases but perhaps risky for no real benefit
+    #    if e.tag in blockTags and e.tail != None:
+    #        e.tail = None
 
-        ## remove unnecessary line breaks and tabbing from tail but replace with space so that web user doesn't lose space
+        # remove unnecessary line breaks and tabbing from tail but replace with space so that web user doesn't lose space
         if e.tail != None:
-            e.tail = e.tail.replace('\r',' ')
-            e.tail = e.tail.replace('\n',' ')
-            e.tail = e.tail.replace('\t',' ')
+            e.tail = e.tail.replace('\r', ' ')
+            e.tail = e.tail.replace('\n', ' ')
+            e.tail = e.tail.replace('\t', ' ')
 
-            ## reduce double spacing to single in tail - doesn't touch &nbsp; so only affects code view not web user view
+            # reduce double spacing to single in tail - doesn't touch &nbsp; so only affects code view not web user view
             while True:
-                if e.tail.count('  ') !=0:
+                if e.tail.count('  ') != 0:
                     e.tail = e.tail.replace('  ', ' ')
                 else:
                     break
 
-        ## same as above but for text rather than tail
+        # same as above but for text rather than tail
         if e.text != None:
-            e.text = e.text.replace('\r',' ')
-            e.text = e.text.replace('\n',' ')
+            e.text = e.text.replace('\r', ' ')
+            e.text = e.text.replace('\n', ' ')
             while True:
-                if e.text.count('  ') !=0:
+                if e.text.count('  ') != 0:
                     e.text = e.text.replace('  ', ' ')
                 else:
                     break
 
 
     for element in reversed(allElements):
-        ## Consistency
+        # Consistency
         if element.tail == '':
             element.tail = None
-        ## resolve situation where inline tags unnecessarily close and then immediately reopen
+        # resolve situation where inline tags unnecessarily close and then immediately reopen
         if element.tag in inlineTags and element.tail == None and element.getchildren() == []:
             if element.getnext() !=None and element.getnext().tag == element.tag and element.getnext().attrib == element.attrib:
                 if element.text != None and element.getnext().text == None:
@@ -352,7 +347,7 @@ def generic_clean(htmlRoot):
                 element.drop_tree()
                 counter += 1
 
-    ## sort newline and tabbing
+    # sort newline and tabbing
     currentGen = [htmlRoot]
     nextGen = []
     genCounter = 0
@@ -381,14 +376,14 @@ def generic_clean(htmlRoot):
 
         currentGen = nextGen
         nextGen = []
-        genCounter+=1
+        genCounter += 1
 
     return (htmlRoot)
 
-def replace_back_pages (htmlRoot):
-    h2s = htmlRoot.cssselect('h2')
+def replace_back_pages(htmlRoot):
+    # h2s = htmlRoot.cssselect('h2')
 
-    def drop_and_replace (h2_to_drop, replacement_html):
+    def drop_and_replace(h2_to_drop, replacement_html):
         while True:
             next_element = h2_to_drop.getnext()
             try:
@@ -408,15 +403,16 @@ def replace_back_pages (htmlRoot):
     writEvText = html.parse(Required['writEvText']).getroot().getchildren()[0].getchildren()[0]
     pastRepText = html.parse(Required['pastRepText']).getroot().getchildren()[0].getchildren()[0]
 
-    for h2 in h2s:
+    # for h2 in h2s:
+    for h2 in htmlRoot.iter('h2'):
         if h2.text_content().strip().lower() == 'witnesses' or h2.text_content().strip().lower() == 'witness':
-            drop_and_replace (h2, witnessText)
+            drop_and_replace(h2, witnessText)
 
         elif h2.text_content().strip().lower() == 'published written evidence':
-            drop_and_replace (h2, writEvText)
+            drop_and_replace(h2, writEvText)
 
         elif h2.text_content().strip().lower() == 'list of reports from the committee during the current parliament':
-            drop_and_replace (h2, pastRepText)
+            drop_and_replace(h2, pastRepText)
 
     return (htmlRoot)
 
@@ -437,8 +433,9 @@ def separate_summary(htmlRoot):
             # perhaps it would be faster to copy the root rarther than many small elements..?
             # destination.append(deepcopy(sibling))
 
-    elements = htmlRoot.cssselect('h2, .SummaryHeading')
-    print(len(elements))
+    # elements = htmlRoot.cssselect('h2, .SummaryHeading')
+    elements = htmlRoot.xpath('//h2 |  //*[@class="SummaryHeading"]')
+
     summary_start = None
     for element in elements:
         if str(element.text_content()).strip() in ('Summary', '***Summary'):
@@ -507,22 +504,22 @@ def no_toc_footnote_heading(htmlRoot):
 
 
 def convert_box_tables(htmlRoot):
-    tables = htmlRoot.cssselect('table')
+    tables = htmlRoot.iter('table')
     for table in tables:
-        cells = table.cssselect('td')
-        rows  = table.cssselect('tr')
+        cells = table.xpath('.//td')
+        rows  = table.xpath('.//tr')
 
-        if (cells is not None and len(cells) == 1 and
-           (rows is not None and len(rows) == 1)):
-                cells[0].drop_tag()
-                rows[0].drop_tag()
-                colgroups = table.cssselect('colgroup')
-                cols      = table.cssselect('col')
-                tbodies   = table.cssselect('tbody')
-                for item in colgroups + cols + tbodies:
-                    item.drop_tag()
-                table.attrib['class'] = 'callout'
-                table.tag = 'div'
+        if len(cells) == 1 and len(rows) == 1:
+            cells[0].drop_tag()
+            rows[0].drop_tag()
+            # colgroups = table.cssselect('colgroup')
+            # cols      = table.cssselect('col')
+            # tbodies   = table.cssselect('tbody')
+            # for item in colgroups + cols + tbodies:
+            for item in table.xpath('.//colgroup | .//col | .//tbody'):
+                item.drop_tag()
+            table.attrib['class'] = 'callout'
+            table.tag = 'div'
     return htmlRoot
 
 
@@ -539,40 +536,44 @@ def add_classes_to_tables(htmlRoot):
 
 
 
-def correct_internal_links (htmlRoot):
-    elements = htmlRoot.cssselect('[href*="IDExport.html"]')
+def correct_internal_links(htmlRoot):
+    # elements = htmlRoot.cssselect('[href*="IDExport.html"]')
+    elements = htmlRoot.xpath('.//*[@href and contains(@href, "IDExport.html")]')
     for element in elements:
         element.attrib['href'] = element.attrib['href'][13:]
-    return(htmlRoot)
+    return htmlRoot
 
-def add_footnote_heading (htmlRoot):
-    try:
-        target = htmlRoot.cssselect('#ftn1')[0]
-    except:
-        target = htmlRoot.cssselect('div[class=_idFootnotes]')[0]
+def add_footnote_heading(htmlRoot):
+    # target = htmlRoot.cssselect('#ftn1')[0]
+    target = htmlRoot.find('.//*[@id="ftn1"]')
+
+    # I think all the below is for InDesign stuff
+    # if not iselement(iselement):
+    #     # target = htmlRoot.cssselect('div[class=_idFootnotes]')[0]
+    #     target = htmlRoot.find('.//div[@class="_idFootnotes"]')
 
     footnoteHeading = html.Element('h1')
     footnoteHeading.text = 'Footnotes'
     target.addprevious(footnoteHeading)
-    return(htmlRoot)
+    return htmlRoot
 
-def fix_fm_tables (htmlRoot):
-    fmTables = htmlRoot.cssselect('table')
-    print(len(fmTables))
+def fix_fm_tables(htmlRoot):
+    fmTables = list(htmlRoot.iter('table'))
+    print('No. fmTables: ', len(fmTables))
     for tab in fmTables:
-        tab.cssselect('colgroup')[0].drop_tree()
-        ps = tab.cssselect('p')
+        tab.find('.//colgroup').drop_tree()
+        ps = tab.iter('p')
         for p in ps:
-            if p.text == None or p.text == "":
+            if not p.text:
                 p.drop_tree()
             else:
                 p.tag = 'td'
-        double_tds = tab.cssselect('td td')
+        # double_tds = tab.cssselect('td td')
+        double_tds = tab.xpath('.//td/td')
         for double_td in double_tds:
+            # why are we doing this?
             double_td.getparent().drop_tag()
-        rows = tab.cssselect('tr')
 
-    return(htmlRoot)
+        # rows = tab.cssselect('tr')
 
-
-
+    return htmlRoot

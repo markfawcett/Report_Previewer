@@ -1,11 +1,11 @@
-from lxml import html
-from lxml.etree import Element
+from lxml import html  # type: ignore
+from lxml.etree import Element  # type: ignore
 import re
 
 
-def drop_most_divs (htmlRoot):
-    ## remove divs not belonging to footnotes
-    divs = htmlRoot.cssselect('div')
+def drop_most_divs(htmlRoot):
+    # remove divs not belonging to footnotes
+    divs = htmlRoot.iter('div')
     for div in divs:
         try:
             if div.attrib['id'][0:3] != 'ftn':
@@ -29,25 +29,28 @@ def chage_class_names(htmlRoot, classes):
     return htmlRoot
 
 
-def format_footnotes (htmlRoot):
-    footnotes = htmlRoot.cssselect("div p[class=MsoFootnoteText]")
+def format_footnotes(htmlRoot):
+    footnotes = htmlRoot.xpath('//div//p[@class="MsoFootnoteText"]')
 
     for footnote in footnotes:
         parent = footnote.getparent()
         parent.tag = 'p'
-        parent.attrib['class'] = 'FootnoteText'
+        parent.set('class', 'FootnoteText')
         footnote.drop_tag()
 
         try:
-            footnote_reference = parent.cssselect("span[class=MsoFootnoteReference] span[class=MsoFootnoteReference] span")[0]
-            if footnote_reference.text[0] == '[':
-                footnote_reference.text = footnote_reference.text[1:]
-            if footnote_reference.text[-1] == ']':
-                footnote_reference.text = footnote_reference.text[:-1]
+            # footnote_reference = parent.cssselect("span[class=MsoFootnoteReference] span[class=MsoFootnoteReference] span")[0]
+            epath = './/span[@class="MsoFootnoteReference"]//span[@class="MsoFootnoteReference"]//span'
+            footnote_reference = parent.find(epath)
+            footnote_reference.text = footnote_reference.text.strip('[]')
+            # if footnote_reference.text[0] == '[':
+            #     footnote_reference.text = footnote_reference.text[1:]
+            # if footnote_reference.text[-1] == ']':
+            #     footnote_reference.text = footnote_reference.text[:-1]
         except:
             pass
 
-        spans = parent.cssselect('span')
+        spans = parent.iter('span')
         for span in spans:
             try:
                 if span.attrib['class'] == 'MsoFootnoteReference' or span.attrib['class'] == "MsoHyperlink":
@@ -62,9 +65,11 @@ def format_footnotes (htmlRoot):
 
     return (htmlRoot)
 
-def format_footnote_refs (htmlRoot):
-    ## This must come after the footnotes have been formatted or else it might catch them accidentally
-    foot_refs = htmlRoot.cssselect('a span[class=MsoFootnoteReference] span[class=MsoFootnoteReference] span')
+def format_footnote_refs(htmlRoot):
+    # This must come after the footnotes have been formatted or else it might catch them accidentally
+    # foot_refs = htmlRoot.cssselect('a span[class=MsoFootnoteReference] span[class=MsoFootnoteReference] span')
+    xpath = '//a//span[@class="MsoFootnoteReference"]/span[@class="MsoFootnoteReference"]/span'
+    foot_refs = htmlRoot.xpath(xpath)
     for foot_ref in foot_refs:
         try:
             if foot_ref.text[0] == '[':
@@ -105,7 +110,7 @@ def fix_ordered_lists(htmlRoot):
     for ordered_class in ['Para1', 'Para2', 'Para3', 'Para4', 'OrderedList1',
                           'CRPara1', 'ChapterHeading1', 'AppendixHeading1']:
 
-        elements = htmlRoot.cssselect('*[class=' + ordered_class + ']')
+        elements = htmlRoot.xpath(f'//*[@class="{ordered_class}"]')
 
         for element in elements:
             try:
@@ -126,7 +131,8 @@ def fix_ordered_lists(htmlRoot):
 def fix_bullet_points(htmlRoot, bullet_classes):
     # Remove bad Windows bullet points and spacing
     for bullet_class in bullet_classes:
-        elements = htmlRoot.cssselect("p[class=" + bullet_class + "]")
+
+        elements = htmlRoot.xpath(f'//p[@class="{bullet_class}"]')
         for element in elements:
             while True:
                 if element.text:
@@ -166,17 +172,17 @@ def wrap_uls(htmlRoot, bullet_classes):
     return htmlRoot
 
 
-def separate_summary (htmlRoot):
+def separate_summary(htmlRoot):
     firstIndicator = None
     secondIndicator = None
 
 
-    def drop_sibs (element, backwards = False):
-        siblingIterator = element.itersiblings(preceding = backwards)
+    def drop_sibs(element, backwards=False):
+        siblingIterator = element.itersiblings(preceding=backwards)
         for sibling in siblingIterator:
             sibling.drop_tree()
 
-    def move_sibs (start, stop, destination):
+    def move_sibs(start, stop, destination):
         siblingIterator = start.itersiblings()
         destination.append(start)
         for sibling in siblingIterator:
@@ -185,7 +191,7 @@ def separate_summary (htmlRoot):
             else:
                 break
 
-    elements = htmlRoot.cssselect('h2')
+    elements = htmlRoot.iter('h2')
     for element in elements:
         if str(element.text_content()).count('***'):
             if firstIndicator == None:
@@ -197,24 +203,24 @@ def separate_summary (htmlRoot):
 
     if firstIndicator == None:
         pass
-        ## more code needed - probably change html tag to div id="report" tag
+        # more code needed - probably change html tag to div id="report" tag
 
     elif secondIndicator == None:
         summary = None
-        report = html.Element('div', attrib={'id':'report'})
+        report = html.Element('div', attrib={'id': 'report'})
         report.tail = '\n'
 
-        drop_sibs (firstIndicator, backwards=True)
-        move_sibs (firstIndicator, None, report)
+        drop_sibs(firstIndicator, backwards=True)
+        move_sibs(firstIndicator, None, report)
 
     else:
-        summary = html.Element('div', attrib={'id':'summary'})
+        summary = html.Element('div', attrib={'id': 'summary'})
         summary.tail = '\n'
-        report = html.Element('div', attrib={'id':'report'})
+        report = html.Element('div', attrib={'id': 'report'})
         report.tail = '\n'
 
-        drop_sibs (firstIndicator, backwards=True)
-        move_sibs (firstIndicator, secondIndicator, summary)
-        move_sibs (secondIndicator, None, report)
+        drop_sibs(firstIndicator, backwards=True)
+        move_sibs(firstIndicator, secondIndicator, summary)
+        move_sibs(secondIndicator, None, report)
 
     return([summary, report])
