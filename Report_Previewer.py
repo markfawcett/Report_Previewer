@@ -16,16 +16,13 @@ from watchdog.events import PatternMatchingEventHandler  # type: ignore
 
 # Import local modules
 try:
-    import Report_Previewer_Helpers.feedback_v2     as feedback
-    # import Report_Previewer_Helpers.file_IO         as file_io
-    # import Report_Previewer_Helpers.id_html         as id_html
-    # import Report_Previewer_Helpers.shell_format_v2 as shell_format
-    import Report_Previewer_Helpers.settings        as st
-    import Report_Previewer_Helpers.triplets        as triplets
-    import Report_Previewer_Helpers.univ_html_v2    as univ_html
-    import Report_Previewer_Helpers.word_html       as word_html
-    import Report_Previewer_Helpers.test_class      as test_class
-    # import Report_Previewer_Helpers.cli_interface2   as cli
+    import Report_Previewer_Helpers.feedback   as feedback
+    import Report_Previewer_Helpers.settings   as st
+    import Report_Previewer_Helpers.triplets   as triplets
+    import Report_Previewer_Helpers.univ_html  as univ_html
+    import Report_Previewer_Helpers.word_html  as word_html
+    import Report_Previewer_Helpers.test_class as test_class
+    # import Report_Previewer_Helpers.cli_interface2 as cli
 except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
 
@@ -56,7 +53,7 @@ def main():
     my_observer.schedule(event_handler, str(watched_Path),
                          recursive=False)  # not interested in sub-directories
 
-    print('Waiting for files to be added to:\n{}\n'.format(watched_Path))
+    print('\nWaiting for files to be added to:\n  {}\n'.format(watched_Path))
     my_observer.start()
     try:
         while True:
@@ -83,14 +80,6 @@ def roubust_execution(funcs, input_html):
             except Exception as e:
                 feedback.writeln('\t\t' + str(e))
 
-
-def wait_for_file(file):
-
-    # wait for file to finish being created or copied
-    historicalSize = -1
-    while (historicalSize != os.path.getsize(file)):
-        historicalSize = os.path.getsize(file)
-        time.sleep(1)
 
 
 def check_parameters_file(parameters_file):
@@ -129,6 +118,14 @@ def check_parameters_file(parameters_file):
 
 
 def on_created(event):
+
+    def wait_for_file(file):
+        """ wait for file to finish being created or copied"""
+        historicalSize = -1
+        while (historicalSize != os.path.getsize(file)):
+            historicalSize = os.path.getsize(file)
+            time.sleep(1)
+
     html_Path = Path(event.src_path)
 
     # wait for file to finish being created/copied
