@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 # std library imports
-# from datetime import datetime
+from copy import deepcopy
 import os
 from pathlib import Path
 import sys
 import time
 import traceback
-# import webbrowser
+from typing import Dict
 
 # Import third-party modules
 from lxml import html  # type: ignore
@@ -22,7 +22,7 @@ try:
     import Report_Previewer_Helpers.univ_html  as univ_html
     import Report_Previewer_Helpers.word_html  as word_html
     import Report_Previewer_Helpers.test_class as test_class
-    # import Report_Previewer_Helpers.cli_interface2 as cli
+    import Report_Previewer_Helpers.cli_interface as cli
 except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
 
@@ -30,6 +30,13 @@ ReportHTML = test_class.ReportHTML
 
 
 def main():
+
+    # - if the command receives command line arguments assume we want the cmd_line version
+    if len(sys.argv) > 1:
+        cli.run(process_html)
+        return
+
+    # - otherwise to the watching thing
 
     # feedback.writeln('Username:\t' + feedback.USERNAME)
 
@@ -63,6 +70,7 @@ def main():
         my_observer.join()
 
 
+
 def roubust_execution(funcs, input_html):
     for func in funcs:
         # global input_html
@@ -79,42 +87,6 @@ def roubust_execution(funcs, input_html):
                 input_html = func[0](input_html, func[1])
             except Exception as e:
                 feedback.writeln('\t\t' + str(e))
-
-
-
-def check_parameters_file(parameters_file):
-    expected_parameters = {
-        'committee_name': '',
-        'report_title': '',
-        'report_type': '',
-        'report_number': '',
-        'publication_date': '',
-        'inquiry_publications_url': ''
-    }
-
-    with open(parameters_file, 'r') as f:
-        lines = f.readlines()
-
-    for i, line in enumerate(lines, start=1):
-        line = line.strip()
-
-        if not line: continue  # skip blank lines
-        # print(line)
-
-        key_value = line.split('\t')
-        if len(key_value) != 2:
-            feedback.warning(f'The parameters file has an error in line {i}.\n  Line {i}:  {line}\n'
-                             f'  Expected key followed by tab followed by value')
-        else:
-            expected_parameters[key_value[0].strip()] = key_value[1].strip()
-
-    for key, value in expected_parameters.items():
-        if not value:
-            feedback.warning(f'Expected parameter {key} is either not present or has no value.'
-                              ' The outputted HTML will be incomplete without this.'
-                              ' Do not publish the HTML until this is fixed.')
-
-    return expected_parameters
 
 
 def on_created(event):
@@ -145,29 +117,67 @@ def on_created(event):
 
     wait_for_file(parameters_file)
 
-    parameters = check_parameters_file(parameters_file)
+    input_params = {}
 
-    c_name = parameters['committee_name']  # could still be ''
+    with open(parameters_file, 'r') as f:
+        lines = f.readlines()
 
-    committee_address = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])
-    # if committee_name is the empty string both the below will be the empty string too
-    parameters['committee_address'], parameters['committee_publications'] = committee_address
+    for i, line in enumerate(lines, start=1):
+        line = line.strip()
+
+        if not line: continue  # skip blank lines
+
+        key_value = line.split('\t')
+        if len(key_value) != 2:
+            feedback.warning(f'The parameters file has an error in line {i}.\n  Line {i}:  {line}\n'
+                             f'  Expected key followed by tab followed by value')
+        else:
+            input_params[key_value[0].strip()] = key_value[1].strip()
 
     # create ReportHTML obj
-    test_class.set_up(html_Path)
+    # test_class.set_up(html_Path)
 
-    input_html = ReportHTML(html_Path, parameters)
+    # input_html = ReportHTML(html_Path, parameters)
 
-    process_html(input_html, html_Path)
+    process_html(html_Path, input_params)
 
     # I wonder if we should now delete both parameters.txt and the html_Path
     html_Path.unlink(missing_ok=True)  # deletes the file
     parameters_file.unlink(missing_ok=True)
 
 
-def process_html(input_html: ReportHTML, input_Path: Path):
+def check_metadate(metadata: Dict[str, str]) -> Dict[str, str]:
+
+    expected_parameters = deepcopy(st.EXPECTED_PARAMETERS)
+    expected_parameters.update(metadata)
+
+    for key, value in expected_parameters.items():
+        if not value:
+            feedback.warning(f'Expected parameter {key} is either not present or has no value.'
+                              ' The outputted HTML will be incomplete without this.'
+                              ' Do not publish the HTML until this is fixed.')
+
+    return expected_parameters
+
+
+# def process_html(input_html: ReportHTML, input_Path: Path):
+def process_html(input_html_Path: Path, metadata: Dict[str, str]):
 
     print('\nProcessing HTML...\n')
+
+
+    # process the metadata
+    metadata = check_metadate(metadata)
+    # try adding data from settings.py to metadata
+    c_name = metadata['committee_name']  # could still be ''
+    committee_address = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])
+    # if committee_name is the empty string both the below will be the empty string too
+    metadata['committee_address'], metadata['committee_publications'] = committee_address
+
+
+    test_class.set_up(input_html_Path)
+
+    input_html = ReportHTML(input_html_Path, metadata)
 
     # changed to set
     accepted_classes = {'contents-heading', 'UnorderedList1', 'UnorderedList2', 'FootnoteText',
@@ -228,7 +238,7 @@ def process_html(input_html: ReportHTML, input_Path: Path):
         if print_summary:
             print_summary.write(test_class.OutputPaths['summary_print'], open_in_browser=False)
     else:
-        print('Summary not created')
+        feedback.warning('Summary not created')
 
     if report:
         print('\nCreating full report')
@@ -237,8 +247,8 @@ def process_html(input_html: ReportHTML, input_Path: Path):
         print_report = report.make_print_version()
         if print_report:
             print_report.write(test_class.OutputPaths['report_print'], open_in_browser=False)
-        else:
-            print('Full report not created')
+    else:
+        feedback.warning('Full report not created')
 
     feedback.writeln('\n  ' + 'All Done!\n')
 

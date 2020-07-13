@@ -2,12 +2,6 @@
 # The following file paths are check on start-up as they
 # are required for the application to run
 REQUIRED = {
-    # 'templates_dir': 'script_resources/templates-to-copy',
-    # 'shell': 'script_resources/templates-to-use/shell.html',
-    # 'print_shell': 'script_resources/templates-to-use/printShell.html',
-    # 'pastRepText': 'script_resources/templates-to-use/pastRepText.html',
-    # 'witnessText': 'script_resources/templates-to-use/witnessText.html',
-    # 'writEvText': 'script_resources/templates-to-use/writEvText.html',
     'templates_dir': 'data',
     'shell': 'templates-to-use/shell.html',
     'print_shell': 'templates-to-use/printShell.html',
@@ -49,6 +43,16 @@ ROPORT_NUMS = [
     "Ninety-first", "Ninety-second", "Ninety-third", "Ninety-fourth", "Ninety-fifth",
     "Ninety-sixth", "Ninety-seventh", "Ninety-eighth", "Ninety-ninth", "One hundredth"
 ]
+
+# expected parameters will become metadata
+EXPECTED_PARAMETERS = {
+    'committee_name': '',
+    'report_title': '',
+    'report_type': '',
+    'report_number': '',
+    'publication_date': '',
+    'inquiry_publications_url': ''
+}
 
 COMMITTEES_AND_ADDRESSES = {
     "Administration Committee": ["https://www.parliament.uk/business/committees/committees-a-z/commons-select/administration-committee/", "https://www.parliament.uk/business/committees/committees-a-z/commons-select/administration-committee/publications/"],
