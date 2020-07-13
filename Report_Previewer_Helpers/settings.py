@@ -1,5 +1,4 @@
 
-
 # The following file paths are check on start-up as they
 # are required for the application to run
 REQUIRED = {
@@ -9,7 +8,7 @@ REQUIRED = {
     # 'pastRepText': 'script_resources/templates-to-use/pastRepText.html',
     # 'witnessText': 'script_resources/templates-to-use/witnessText.html',
     # 'writEvText': 'script_resources/templates-to-use/writEvText.html',
-    'templates_dir': 'templates-to-copy',
+    'templates_dir': 'data',
     'shell': 'templates-to-use/shell.html',
     'print_shell': 'templates-to-use/printShell.html',
     'pastRepText': 'templates-to-use/pastRepText.html',
@@ -17,6 +16,11 @@ REQUIRED = {
     'writEvText': 'templates-to-use/writEvText.html',
 }
 
+# output file names
+REPORT        = 'report.html'
+SUMMARY       = 'summary.html'
+REPORT_PRINT  = 'report_print.html'
+SUMMARY_PRINT = 'summary_print.html'
 
 SOURCES = ['ID', 'Word']
 
@@ -112,4 +116,3 @@ COMMITTEES_AND_ADDRESSES = {
     "Women and Equalities Committee": ["https://www.parliament.uk/business/committees/committees-a-z/commons-select/women-and-equalities-committee/", "https://www.parliament.uk/business/committees/committees-a-z/commons-select/women-and-equalities-committee/publications/"],
     "Work and Pensions Committee": ["https://www.parliament.uk/business/committees/committees-a-z/commons-select/work-and-pensions-committee/", "https://www.parliament.uk/business/committees/committees-a-z/commons-select/work-and-pensions-committee/publications/"]
 }
-
