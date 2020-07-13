@@ -1,8 +1,6 @@
-# from copy import deepcopy
 import re
 
 from lxml import html  # type: ignore
-# from lxml.etree import iselement  # type: ignore
 
 from .settings import REQUIRED as Required
 # ### Constants
@@ -90,9 +88,9 @@ def add_rules(htmlRoot):
                 if previous.tag in tags_of_interest and next_ not in captions:
                     caption.addnext(html.Element('hr'))
 
-                if (len(previous) > 0 and previous[0].tag in tags_of_interest and
-                   next_ not in captions):
-                        caption.addnext(html.Element('hr'))
+                if (len(previous) > 0 and previous[0].tag in tags_of_interest
+                        and next_ not in captions):
+                    caption.addnext(html.Element('hr'))
         except:
             pass
 

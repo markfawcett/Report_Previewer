@@ -30,7 +30,7 @@ def warning(msg):
 
 def error(msg):
 
-    print(f'{bcolors.FAIL}EORROR:{bcolors.ENDC}  {msg}')
+    print(f'\n{bcolors.FAIL}EORROR:{bcolors.ENDC}  {msg}\n')
     if 'tkinter' in sys.modules:
         import tkinter as tk
         from tkinter import messagebox

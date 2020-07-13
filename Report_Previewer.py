@@ -7,26 +7,63 @@ from pathlib import Path
 import sys
 import time
 import traceback
+# import webbrowser
 
 # Import third-party modules
 from lxml import html  # type: ignore
 from watchdog.observers import Observer  # type: ignore
 from watchdog.events import PatternMatchingEventHandler  # type: ignore
-# import webbrowser
 
 # Import local modules
 try:
     import Report_Previewer_Helpers.feedback_v2     as feedback
-    import Report_Previewer_Helpers.file_IO         as file_io
+    # import Report_Previewer_Helpers.file_IO         as file_io
     # import Report_Previewer_Helpers.id_html         as id_html
-    import Report_Previewer_Helpers.shell_format_v2 as shell_format
+    # import Report_Previewer_Helpers.shell_format_v2 as shell_format
     import Report_Previewer_Helpers.settings        as st
     import Report_Previewer_Helpers.triplets        as triplets
     import Report_Previewer_Helpers.univ_html_v2    as univ_html
     import Report_Previewer_Helpers.word_html       as word_html
+    import Report_Previewer_Helpers.test_class      as test_class
     # import Report_Previewer_Helpers.cli_interface2   as cli
 except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
+
+ReportHTML = test_class.ReportHTML
+
+
+def main():
+
+    # feedback.writeln('Username:\t' + feedback.USERNAME)
+
+    # create event handler for watched folder
+    patterns = ["*.htm", '*.html']
+    ignore_patterns = ['*.txt', '*$*']
+
+    event_handler = PatternMatchingEventHandler(patterns, ignore_patterns,
+                                                ignore_directories=True,
+                                                case_sensitive=True)
+    event_handler.on_created = on_created
+
+    # create cross platform path to folder to watch
+    watched_Path = Path(Path.home(), 'committee_report_html/word_filtered_html')
+
+    # create folder to watch if it does not already exist
+    if not watched_Path.exists():
+        watched_Path.mkdir(parents=True, exist_ok=True)
+
+    my_observer = Observer()
+    my_observer.schedule(event_handler, str(watched_Path),
+                         recursive=False)  # not interested in sub-directories
+
+    print('Waiting for files to be added to:\n{}\n'.format(watched_Path))
+    my_observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        my_observer.stop()
+        my_observer.join()
 
 
 def roubust_execution(funcs, input_html):
@@ -56,108 +93,89 @@ def wait_for_file(file):
         time.sleep(1)
 
 
+def check_parameters_file(parameters_file):
+    expected_parameters = {
+        'committee_name': '',
+        'report_title': '',
+        'report_type': '',
+        'report_number': '',
+        'publication_date': '',
+        'inquiry_publications_url': ''
+    }
+
+    with open(parameters_file, 'r') as f:
+        lines = f.readlines()
+
+    for i, line in enumerate(lines, start=1):
+        line = line.strip()
+
+        if not line: continue  # skip blank lines
+        # print(line)
+
+        key_value = line.split('\t')
+        if len(key_value) != 2:
+            feedback.warning(f'The parameters file has an error in line {i}.\n  Line {i}:  {line}\n'
+                             f'  Expected key followed by tab followed by value')
+        else:
+            expected_parameters[key_value[0].strip()] = key_value[1].strip()
+
+    for key, value in expected_parameters.items():
+        if not value:
+            feedback.warning(f'Expected parameter {key} is either not present or has no value.'
+                              ' The outputted HTML will be incomplete without this.'
+                              ' Do not publish the HTML until this is fixed.')
+
+    return expected_parameters
+
+
 def on_created(event):
-    html_file = Path(event.src_path)
+    html_Path = Path(event.src_path)
 
     # wait for file to finish being created/copied
-    wait_for_file(html_file)
-    print(f"File created: {event.src_path}")
+    wait_for_file(html_Path)
+    print(f"New HTML file created:\n  {event.src_path}")
 
-    parameters_file = html_file.parent.joinpath('parameters.txt')
-    print(f'Looking for {str(parameters_file)}')
+    parameters_file = html_Path.parent.joinpath('parameters.txt')
+    print(f'Looking for required parameters file\n  {str(parameters_file)}')
 
     if not parameters_file.exists():
-        feedback.error(f'there is no parameters file associated with  {str(html_file.name)}'
-                       '\nthe parameters file is required and is expected to be saved in the following folder:'
-                       f'\n{html_file.parent}')
+        feedback.error(
+            f'there is no parameters file associated with  {html_Path.name}'
+            '\nthe parameters file is required and is expected to be saved in the following folder:'
+            f'\n{html_Path.parent}')
+
         return
 
     wait_for_file(parameters_file)
 
-    parameters = {}
-    with open(parameters_file, 'r') as f:
-        for line in f.readlines():
+    parameters = check_parameters_file(parameters_file)
 
-            # skip blank lines
-            if not line.strip():
-                continue
+    c_name = parameters['committee_name']  # could still be ''
 
-            print(line)
+    committee_address = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])
+    # if committee_name is the empty string both the below will be the empty string too
+    parameters['committee_address'], parameters['committee_publications'] = committee_address
 
-            key_value = line.split('\t')
-            if len(key_value) != 2:
-                print('Error in the following line. '
-                      f'Expected key followed by tab followed by vlaue\n{line}')
-                return
+    # create ReportHTML obj
+    test_class.set_up(html_Path)
 
-            parameters[key_value[0].strip()] = key_value[1].strip()
+    input_html = ReportHTML(html_Path, parameters)
 
-    expected_args = {'committee_name', 'report_title', 'report_type',
-                     'report_number', 'publication_date', 'inquiry_publications_url'}
+    process_html(input_html, html_Path)
 
-    if not expected_args.issubset(set(parameters.keys())):
-        print(f'One of the expected parameters {expected_args} not found in file {str(parameters_file)}')
-    else:
-        c_name = parameters['committee_name']
-        parameters['committee_address'] = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])[0]
-        parameters['committee_publications'] = st.COMMITTEES_AND_ADDRESSES.get(c_name, ['', ''])[1]
-
-    process_html(str(html_file), **parameters)
-
-    # I wonder if we should now delete both parameters.txt and the html_file
-    html_file.unlink(missing_ok=True)  # deletes the file
+    # I wonder if we should now delete both parameters.txt and the html_Path
+    html_Path.unlink(missing_ok=True)  # deletes the file
     parameters_file.unlink(missing_ok=True)
 
 
-def main():
+def process_html(input_html: ReportHTML, input_Path: Path):
 
-    feedback.writeln('Username:\t' + feedback.USERNAME)
-
-    # create event handler for watched folder
-    patterns = ["*.htm", '*.html']
-    ignore_patterns = ['*.txt', '*$*']
-
-
-    event_handler = PatternMatchingEventHandler(patterns, ignore_patterns,
-                                                ignore_directories=True,
-                                                case_sensitive=True)
-    event_handler.on_created = on_created
-
-    # create cross platform path to folder to watch
-    watched_folder = Path(Path.home(), 'committee_report_html/word_filtered_html')
-    # create folder to watch if it does not already exsit
-    if not watched_folder.exists():
-        watched_folder.mkdir(parents=True, exist_ok=True)
-
-    # current_folder_to_watch = str(Path(Path.home(), 'committee_report_html'))
-    path = str(watched_folder)
-    my_observer = Observer()
-    my_observer.schedule(event_handler, path, recursive=False)  # not interested in sub-directories
-
-    print('Waiting for files to be added to:\n{}\n'.format(watched_folder))
-    my_observer.start()
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        my_observer.stop()
-        my_observer.join()
-
-
-
-def process_html(html_path, **kwargs):
-
-    file_io.set_up(html_path)
-
-    meta = kwargs
-    # feedback.writeln('Meta:\t' + str(meta))
+    print('\nProcessing HTML...\n')
 
     # changed to set
     accepted_classes = {'contents-heading', 'UnorderedList1', 'UnorderedList2', 'FootnoteText',
                         'figure-caption', 'caption', 'callout', 'text-center', 'text-right',
                         'table', 'table-bordered',  'header-cell'}
-
-    input_html = html.parse(html_path).getroot()
 
     # remove the word vs indesign version
     # if source == "Word":
@@ -188,10 +206,10 @@ def process_html(html_path, **kwargs):
         [triplets.map_classes_and_tags, ['Word']],  # only use word version atm
         [word_html.wrap_uls, ['UnorderedList1', 'UnorderedList2', 'BoxUnorderedList1']],
     )
-    roubust_execution(funcs, input_html)
+    roubust_execution(funcs, input_html.root)
 
     # final functions are the same regardless of source
-    funcs = ([univ_html.keep_only_accepted_classes, accepted_classes],
+    funcs = ([univ_html.keep_only_accepted_classes, accepted_classes],  # type: ignore
              univ_html.tidy_cycle,
              univ_html.generic_clean,
              univ_html.tidy_cycle,  # deliberately repeated
@@ -200,29 +218,30 @@ def process_html(html_path, **kwargs):
              # univ_html.add_back_to_top,
              univ_html.no_toc_footnote_heading,
              univ_html.replace_back_pages)
-    roubust_execution(funcs, input_html)
+    roubust_execution(funcs, input_html.root)
 
-    file_io.copy_css_etc()
+    summary, report = test_class.separate_summary(input_html)
 
-    # change to input name
-    # base_file_name = datetime.now().strftime('%Y-%b-%d--%H-%M-%S')
-    base_file_name = Path(html_path).name.replace('.html', '').replace('.htm', '')
-
-    summary, report = univ_html.separate_summary(input_html)
-
-    if summary is not None:
-        print('\nCreating summary')
-        summary = shell_format.add_meta(summary, 'summary', meta)
-        file_io.write_html(summary, base_file_name + '-report-summary.html', open_in_browser=True)
+    if summary:  # could be None
+        print('\nCreating summary:')
+        summary.write(test_class.OutputPaths['summary_web'])
 
         # lets also have a go at creating a print-summary
-        import Report_Previewer_Helpers.print_summary as print_summary
-        summary_print = print_summary.print_html(summary, **meta)
-        file_io.write_html(summary_print, base_file_name + '-print-summary.html', open_in_browser=False)
+        print_summary = summary.make_print_version()
+        if print_summary:
+            print_summary.write(test_class.OutputPaths['summary_print'], open_in_browser=False)
+    else:
+        print('Summary not created')
 
-    print('\nCreating full report')
-    report = shell_format.add_meta(report, 'report', meta)
-    file_io.write_html(report, base_file_name + '-full-report.html', open_in_browser=True)
+    if report:
+        print('\nCreating full report')
+        report.write(test_class.OutputPaths['report_web'])
+
+        print_report = report.make_print_version()
+        if print_report:
+            print_report.write(test_class.OutputPaths['report_print'], open_in_browser=False)
+        else:
+            print('Full report not created')
 
     feedback.writeln('\n  ' + 'All Done!\n')
 

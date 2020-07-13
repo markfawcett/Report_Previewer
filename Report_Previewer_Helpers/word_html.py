@@ -63,7 +63,7 @@ def format_footnotes(htmlRoot):
             except:
                 pass
 
-    return (htmlRoot)
+    return htmlRoot
 
 def format_footnote_refs(htmlRoot):
     # This must come after the footnotes have been formatted or else it might catch them accidentally

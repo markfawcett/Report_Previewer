@@ -12,14 +12,14 @@ def insert_html_into_new_shell(injection):
     # print('Path to shell:')
     # print(path_to_shell)
     new_shell = html.parse(path_to_shell).getroot()
-    entryPoint = new_shell.xpath('//*[@id="report-body"]')[0]
+    entryPoint = new_shell.find('.//*[@id="report-body"]')
     entryPoint.append(injection)
-    entryPoint.getchildren()[0].drop_tag()
+    entryPoint[0].drop_tag()
     return(new_shell)
 
 
 def add_col_row_divs(htmlRoot):
-    # Add 'row' and 'col-md-9' divs to h2 sections
+    """Add 'row' and 'col-md-9' divs to h2 sections"""
     h2s = htmlRoot.xpath('//h2')
     for h2 in h2s:
         row_div = h2.makeelement('div', {'class': 'row'})
@@ -54,17 +54,16 @@ def add_ids_for_headings(htmlRoot):
 
 def add_meta(file, page, meta):
 
-    file = add_col_row_divs(file)
+    file = add_col_row_divs(file)  # what is the point of this?
     file = add_ids_for_headings(file)
     file = insert_html_into_new_shell(file)
 
     try:
+        report_title_ele = file.find('.//*[@id="report-title"]')
         if page == 'summary':
-            xpath = '//*[@id="report-title"]'
-            file.xpath(xpath)[0].text = meta['report_title'] + ' – Report Summary'
+            report_title_ele.text = meta['report_title'] + ' – Report Summary'
         elif page == 'report':
-            xpath = '//*[@id="report-title"]'
-            file.xpath(xpath)[0].text = meta['report_title']
+            report_title_ele.text = meta['report_title']
     except:
         pass
 
@@ -99,7 +98,6 @@ def add_meta(file, page, meta):
         report_author_ele.getnext().text = meta['committee_name']
         report_author_ele.getnext().set('title',  meta['committee_name'] + ' website')
         report_author_ele.getnext().set('href',  meta['committee_address'])
-
     except:
         feedback.warning('Committee name not added to author line in output.')
 
@@ -120,4 +118,4 @@ def add_meta(file, page, meta):
         feedback.warning('Committee publications not added to the output.')
 
 
-    return (file)
+    return file
