@@ -1,5 +1,5 @@
-from lxml import html
-from lxml.etree import Element
+from lxml import html  # type: ignore
+from lxml.etree import Element  # type: ignore
 
 from . import feedback_v2 as feedback
 from .settings import REQUIRED as Required
@@ -11,22 +11,22 @@ def print_html(summary_html, **kwargs):
 
     # add meta
     try:
-        print_shell.xpath('//h1[@id="report-title"]')[0].text = kwargs['report_title']
+        print_shell.find('.//h1[@id="report-title"]').text = kwargs['report_title']
     except:
         pass
 
     try:
-        print_shell.xpath('//h2[@id="report-published-date"]')[0].text = kwargs['publication_date']
+        print_shell.find('.//h2[@id="report-published-date"]').text = kwargs['publication_date']
     except:
         pass
 
     try:
-        print_shell.xpath('//h2[@id="committee-name"]')[0].text = kwargs['committee_name']
+        print_shell.find('.//h2[@id="committee-name"]').text = kwargs['committee_name']
     except:
         pass
 
     try:
-        print_shell.xpath('//head/title')[0].text = kwargs['report_title'] + ' - Report Summary'
+        print_shell.find('.//head/title').text = kwargs['report_title'] + ' - Report Summary'
     except:
         pass
 
@@ -59,12 +59,4 @@ def print_html(summary_html, **kwargs):
 
         recommendations_container.extend(elements_for_div)
 
-    return(print_shell)
-
-
-
-
-
-
-
-
+    return print_shell
