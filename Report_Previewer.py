@@ -21,12 +21,12 @@ try:
     import Report_Previewer_Helpers.triplets   as triplets
     import Report_Previewer_Helpers.univ_html  as univ_html
     import Report_Previewer_Helpers.word_html  as word_html
-    import Report_Previewer_Helpers.test_class as test_class
+    import Report_Previewer_Helpers.output_html as output_html
     import Report_Previewer_Helpers.cli_interface as cli
 except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
 
-ReportHTML = test_class.ReportHTML
+ReportHTML = output_html.ReportHTML
 
 
 def main():
@@ -135,7 +135,7 @@ def on_created(event):
             input_params[key_value[0].strip()] = key_value[1].strip()
 
     # create ReportHTML obj
-    # test_class.set_up(html_Path)
+    # output_html.set_up(html_Path)
 
     # input_html = ReportHTML(html_Path, parameters)
 
@@ -175,7 +175,7 @@ def process_html(input_html_Path: Path, metadata: Dict[str, str]):
     metadata['committee_address'], metadata['committee_publications'] = committee_address
 
 
-    test_class.set_up(input_html_Path)
+    output_html.set_up(input_html_Path)
 
     input_html = ReportHTML(input_html_Path, metadata)
 
@@ -227,26 +227,26 @@ def process_html(input_html_Path: Path, metadata: Dict[str, str]):
              univ_html.replace_back_pages)
     roubust_execution(funcs, input_html.root)
 
-    summary, report = test_class.separate_summary(input_html)
+    summary, report = output_html.separate_summary(input_html)
 
     if summary:  # could be None
         print('\nCreating summary:')
-        summary.write(test_class.OutputPaths['summary_web'])
+        summary.write(output_html.OutputPaths['summary_web'])
 
         # lets also have a go at creating a print-summary
         print_summary = summary.make_print_version()
         if print_summary:
-            print_summary.write(test_class.OutputPaths['summary_print'], open_in_browser=False)
+            print_summary.write(output_html.OutputPaths['summary_print'], open_in_browser=False)
     else:
         feedback.warning('Summary not created')
 
     if report:
         print('\nCreating full report')
-        report.write(test_class.OutputPaths['report_web'])
+        report.write(output_html.OutputPaths['report_web'])
 
         print_report = report.make_print_version()
         if print_report:
-            print_report.write(test_class.OutputPaths['report_print'], open_in_browser=False)
+            print_report.write(output_html.OutputPaths['report_print'], open_in_browser=False)
     else:
         feedback.warning('Full report not created')
 
