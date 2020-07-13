@@ -6,7 +6,8 @@ import webbrowser
 from distutils import dir_util
 
 # 3rd party imports
-from lxml import html
+# from lxml import html  # type: ignore
+from lxml.etree import ElementTree  # type: ignore
 
 # Local libraries
 from . import feedback_v2 as feedback
@@ -17,40 +18,12 @@ from .settings import REQUIRED as Required
 OUTPUT_FOLDER = datetime.now().strftime('%Y-%b-%d @ %H-%M-%S')
 
 
-# Functions
-def check_requirements():
-
-    error_message = "Can't run. Required files and/or folders are missing:\n\n   "
-    missing_paths = ''
-
-    for key, value in Required.items():
-
-        if not Path(value).exists():
-            # on posix systems especialy we may not be able to find relative paths if the
-            # script is run from a directory other than the parent of the main script.
-            # Next line will attempt to find the paths via first finding the path to
-            # this script and then going from there.
-            script_dir_plus_relative_path = Path(
-                os.path.dirname(__file__)).parent.joinpath(value)
-            if script_dir_plus_relative_path.exists():
-                # update dictionary
-                Required[key] = str(script_dir_plus_relative_path)
-            else:
-                missing_paths += '\u2022   ' + value + '\n\n   '
-
-    if missing_paths:
-        # feedback.writeln(error_message + missing_paths)
-        feedback.error(error_message + missing_paths)
-        exit()
-
-
 def set_up(input_file):
     # create the output folder next t the input file
-    output_folder = Path(input_file).parent.absolute()
+    output_folder = Path(input_file).parent.resolve()
 
     global OUTPUT_FOLDER
     OUTPUT_FOLDER = str(output_folder)
-
 
 
 def write_html(htmlRoot, file_name, open_in_browser=True):
@@ -59,10 +32,14 @@ def write_html(htmlRoot, file_name, open_in_browser=True):
 
     output_file_path = Path(OUTPUT_FOLDER).joinpath(file_name)
     try:
-        temp_string = html.tostring(htmlRoot, doctype='<!DOCTYPE html>')  # should be DOCTYPE
-        output_file = open(output_file_path, 'w')
-        output_file.write(temp_string.decode(encoding='UTF-8'))
-        output_file.close()
+        # temp_string = html.tostring(htmlRoot, doctype='<!DOCTYPE html>')  # should be DOCTYPE
+        # output_file = open(output_file_path, 'w')
+        # output_file.write(temp_string.decode(encoding='UTF-8'))
+        # output_file.close()
+        htmlTree = ElementTree(htmlRoot)
+        htmlTree.write(str(output_file_path), method="html",
+                       encoding='UTF-8', doctype='<!DOCTYPE html>')
+
 
     except Exception as err:
         feedback.writeln("Error:\twrite_html()\except0")
@@ -84,3 +61,29 @@ def copy_css_etc():
     except:
         pass
 
+
+# Functions
+# def check_requirements():
+
+#     error_message = "Can't run. Required files and/or folders are missing:\n\n   "
+#     missing_paths = ''
+
+#     for key, value in Required.items():
+
+#         if not Path(value).exists():
+#             # on posix systems especialy we may not be able to find relative paths if the
+#             # script is run from a directory other than the parent of the main script.
+#             # Next line will attempt to find the paths via first finding the path to
+#             # this script and then going from there.
+#             script_dir_plus_relative_path = Path(
+#                 os.path.dirname(__file__)).parent.joinpath(value)
+#             if script_dir_plus_relative_path.exists():
+#                 # update dictionary
+#                 Required[key] = str(script_dir_plus_relative_path)
+#             else:
+#                 missing_paths += '\u2022   ' + value + '\n\n   '
+
+#     if missing_paths:
+#         # feedback.writeln(error_message + missing_paths)
+#         feedback.error(error_message + missing_paths)
+#         exit()
