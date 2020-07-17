@@ -13,8 +13,8 @@ REQUIRED = {
 # output file names
 REPORT        = 'report.html'
 SUMMARY       = 'summary.html'
-REPORT_PRINT  = 'report_print.html'
-SUMMARY_PRINT = 'summary_print.html'
+REPORT_PRINT  = 'report-print.html'
+SUMMARY_PRINT = 'summary-print.html'
 
 SOURCES = ['ID', 'Word']
 
