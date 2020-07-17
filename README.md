@@ -17,7 +17,7 @@ To contribute you should usually create your own branch first and then submit a 
 1. Install Python from [python.org](https://www.python.org/downloads/). You may need admin privileges to do this.
 2. Make sure that as you install it that you add python to the PATH.
 3. Install the dependencies by opening a PowerShell or command prompt window (or maybe GitBash window) and navigating to the folder you cloned this repository into (`cd` is how you navigate). Then type `pip install -r requirements.txt` and press enter. If you get permission errors you may also try `pip install --user -r requirements.txt`
-4. Test everything worked by double clicking on Report_Previewer.py in windows explorer. Open a word file that uses the RAT2 template and click 'Web Preview'.
+4. Test everything worked by double clicking on Report_Previewer.py in windows explorer. Open a word file that uses the RAT2 template and click 'Web Preview'. You're browser should open with an HTML version of the report.
 
 ### Fonts
 I have decided not to store the fonts here as I don't know if they should be made public. You can get the font files from my [OneDrive](https://hopuk-my.sharepoint.com/:f:/g/personal/fawcettm_parliament_uk/EiwKXtif1aFNmOIxIv7SK5sBcToM0uHlkuCDZd_42AEImQ?e=BLcyY7) . Copy the whole Fonts folder into the data folder within the folder you cloned above.
