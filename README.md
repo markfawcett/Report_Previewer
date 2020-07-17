@@ -16,7 +16,7 @@ To contribute you should usually create your own branch first and then submit a 
 
 1. Install Python from [python.org](https://www.python.org/downloads/). You may need admin privileges to do this.
 2. Make sure that as you install it that you add python to the PATH.
-3. Install the dependencies by opening a PowerShell or command prompt window (or maybe GitBash window) and navigating to the folder you cloned this repository into (`cd` is how you navigate). Then did `pip install requirements.txt` if you get errors you may also try `pip install --user requirements.txt`
+3. Install the dependencies by opening a PowerShell or command prompt window (or maybe GitBash window) and navigating to the folder you cloned this repository into (`cd` is how you navigate). Then did `pip install -r requirements.txt` if you get errors you may also try `pip install --user -r requirements.txt`
 4. Test everything worked by double clicking on Report_Previewer.py in windows explorer. Open a word file that uses the RAT2 template and click 'Web Preview'.
 
 ### Fonts
