@@ -148,7 +148,7 @@ class ReportHTML:
                     webbrowser.open('file://' + str(Path(output_file_path).resolve()))
                 else:
                     webbrowser.open(output_file_path)
-        except:
+        except Exception:
             pass
 
 
@@ -193,6 +193,15 @@ class OutputHTML(ReportHTML):
 
         body = shell.root.find('body')
         body.extend(report_body)  # will work even if there is more that one report-body
+
+        # remove non-breaking spaces as oxygen PDF chemistry does not like them
+        for ele in body.iter():
+            if ele.text:
+                ele.text = ele.text.replace('\u00A0', ' ')  # remove no break space
+                ele.text = ele.text.replace('\u00AD', '')  # remove discretionary hyphens
+            if ele.tail:
+                ele.tail = ele.tail.replace('\u00A0', ' ')  # remove no break space
+                ele.tail = ele.tail.replace('\u00AD', '')  # remove discretionary hyphens
 
         # look through report-body for elements that should be in an `recommendations-container`
         recomendations_headings = body.xpath('.//h3[contains(text(),"ecommendations")]')
