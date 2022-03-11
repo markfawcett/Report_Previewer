@@ -73,6 +73,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'National';
+  src: url('../fonts/National-LFS-SemiboldItalic.otf') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+}
+
 @mixin font-face($font-weight){
   @if $font-weight == standard {
     font-weight: 500;
