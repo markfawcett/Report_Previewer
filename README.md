@@ -22,6 +22,10 @@ To contribute you should usually create your own branch first and then submit a 
 ### Fonts
 I have decided not to store the fonts here as I don't know if they should be made public. You can get the font files from my [OneDrive](https://hopuk-my.sharepoint.com/:f:/g/personal/fawcettm_parliament_uk/EiwKXtif1aFNmOIxIv7SK5sBcToM0uHlkuCDZd_42AEImQ?e=BLcyY7) . Copy the whole Fonts folder into the data folder within the folder you cloned above.
 
+### To create the CSS
+Use [dart sass](https://sass-lang.com/guide) to convert the SCSS files to CSS.
+e.g. `sass sass/summary-overview-print.scss css/summary-overview-print.css`
+
 
 ## Use Oxygen PDF chemistry to create the PDF versions
 Instructions to come later...
