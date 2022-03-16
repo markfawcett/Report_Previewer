@@ -239,25 +239,26 @@ def process_html(input_html_Path: Path, metadata: Dict[str, str]):
     if summary:  # could be None
         print('\nCreating summary:')
         # summary.write(output_html.OutputPaths['summary_web'])
-        summary.write(ReportHTML.summary_web)
+        summary.write(ReportHTML.summary_web, verbose=True)
 
         # lets also have a go at creating a print-summary
         print_summary = summary.make_print_version()
         if print_summary:
             # print_summary.write(output_html.OutputPaths['summary_print'], open_in_browser=False)
-            print_summary.write(ReportHTML.summary_print, open_in_browser=False)
+            print_summary.write(ReportHTML.summary_print, open_in_browser=False, verbose=True)
+            # try running oxygen PDF chemistry if it exists
     else:
         feedback.warning('Summary not created')
 
     if report:
         print('\nCreating full report')
         # report.write(output_html.OutputPaths['report_web'])
-        report.write(ReportHTML.report_web)
+        report.write(ReportHTML.report_web, verbose=True)
 
         print_report = report.make_print_version()
         if print_report:
             # print_report.write(output_html.OutputPaths['report_print'], open_in_browser=False)
-            print_report.write(ReportHTML.report_print, open_in_browser=False)
+            print_report.write(ReportHTML.report_print, open_in_browser=False, verbose=True)
     else:
         feedback.warning('Full report not created')
 
