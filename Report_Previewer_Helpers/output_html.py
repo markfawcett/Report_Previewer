@@ -103,7 +103,7 @@ class ReportHTML:
         try:
             Required['templates_dir']
             dir_util.copy_tree(Required['templates_dir'], str(output_folder_Path))
-        except:
+        except Exception:
             feedback.error('Could not copy CSS etc. HTML file may not appear styled correctly.')
 
         # copy any images that may be in a word_filtered_html_files folder
@@ -113,7 +113,7 @@ class ReportHTML:
                                str(output_folder_Path / cls.img_folder))
         except DistutilsFileError:
             pass
-        except:
+        except Exception:
             feedback.error('Could not copy any Images etc.')
 
         # cls._set_up_done = True
@@ -139,7 +139,13 @@ class ReportHTML:
         self.html_tree.write(output_file_path, method="html",
                              encoding='UTF-8', doctype='<!DOCTYPE html>')
 
-        if verbose: print(output_file_path)
+        if verbose:
+            print(output_file_path)
+            print('self is')
+            print(f'{self.report_web=}', f'{self.summary_web=}',
+                  f'{self.report_print=}', f'{self.summary_print}')
+
+
 
         # try to open in a web browser
         try:
