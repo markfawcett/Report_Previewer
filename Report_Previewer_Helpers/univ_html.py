@@ -91,7 +91,7 @@ def add_rules(htmlRoot):
                 if (len(previous) > 0 and previous[0].tag in tags_of_interest
                         and next_ not in captions):
                     caption.addnext(html.Element('hr'))
-        except:
+        except Exception:
             pass
 
     return htmlRoot
@@ -114,7 +114,7 @@ def fix_blockquotes(htmlRoot):
         try:
             if element.getprevious().tag == 'blockquote' or element.getprevious().tag == 'blockquote-subsequent':
                 element.tag = 'blockquote-subsequent'
-        except:
+        except Exception:
             pass
 
     elements = htmlRoot.xpath('//blockquote')
@@ -132,7 +132,7 @@ def fix_blockquotes(htmlRoot):
                     nextElement = nextElement.getnext()
                 else:
                     break
-            except:
+            except Exception:
                 break
         myBlock = element.makeelement('blockquote')
         element.addprevious(myBlock)
@@ -179,7 +179,7 @@ def keep_only_accepted_classes(htmlRoot, accepted_classes):
 #         try:
 #             if element.attrib['class'] not in accepted_classes:
 #                 element.attrib.pop('class')
-#         except:
+#         except Exception:
 #             pass
 #     return htmlRoot
 
@@ -191,7 +191,7 @@ def tidy_cycle(htmlRoot):
             element.drop_tree()
             nonlocal repeat
             repeat = True
-        except:
+        except Exception:
             pass
 
 
@@ -200,7 +200,7 @@ def tidy_cycle(htmlRoot):
             element.drop_tag()
             nonlocal repeat
             repeat = True
-        except:
+        except Exception:
             pass
 
     repeat = False
@@ -247,7 +247,7 @@ def tidy_cycle(htmlRoot):
                 if element.tag == parent.tag and element.text_content() == parent.text_content() and element.attrib == parent.attrib:
                     attempt_drop_tag(element)
                     repeat = True
-            except:
+            except Exception:
                 pass
 
         # Remove empty attributes that have no purpose if empty
@@ -280,7 +280,7 @@ def tidy_cycle(htmlRoot):
                 if element.tail and element.tail.find('\xa0\xa0') != -1:
                     element.tail = str(element.tail).replace('\xa0\xa0', '\xa0')
                     repeat = True
-        except:
+        except Exception:
             pass
 
 
@@ -389,11 +389,11 @@ def replace_back_pages(htmlRoot):
                     break
                 else:
                     next_element.drop_tree()
-            except:
+            except Exception:
                 break
         try:
             h2_to_drop.addnext(replacement_html)
-        except:
+        except Exception:
             pass
         h2_to_drop.drop_tree()
 

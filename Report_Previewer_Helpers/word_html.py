@@ -10,10 +10,10 @@ def drop_most_divs(htmlRoot):
         try:
             if div.attrib['id'][0:3] != 'ftn':
                 div.drop_tag()
-        except:
+        except Exception:
             try:
                 div.drop_tag()
-            except:
+            except Exception:
                 pass
 
     return(htmlRoot)
@@ -47,7 +47,7 @@ def format_footnotes(htmlRoot):
             #     footnote_reference.text = footnote_reference.text[1:]
             # if footnote_reference.text[-1] == ']':
             #     footnote_reference.text = footnote_reference.text[:-1]
-        except:
+        except Exception:
             pass
 
         spans = parent.iter('span')
@@ -55,12 +55,12 @@ def format_footnotes(htmlRoot):
             try:
                 if span.attrib['class'] == 'MsoFootnoteReference' or span.attrib['class'] == "MsoHyperlink":
                     span.attrib.pop('class')
-            except:
+            except Exception:
                 pass
             try:
                 if len(span.attrib) == 0:
                     span.drop_tag()
-            except:
+            except Exception:
                 pass
 
     return htmlRoot
@@ -76,14 +76,14 @@ def format_footnote_refs(htmlRoot):
                 foot_ref.text = foot_ref.text[1:]
             if foot_ref.text[-1] == ']':
                 foot_ref.text = foot_ref.text[:-1]
-        except:
+        except Exception:
             pass
 
         try:
             foot_ref.getparent().getparent().drop_tag()
             foot_ref.getparent().drop_tag()
             foot_ref.tag = 'a'
-        except:
+        except Exception:
             pass
 
         foot_ref.attrib['href'] = "#" + foot_ref.getparent().attrib['href'][2:]
@@ -93,13 +93,13 @@ def format_footnote_refs(htmlRoot):
             foot_ref.getparent().tag = 'sup'
             foot_ref.getparent().attrib['id'] = foot_ref.getparent().attrib['name']
             foot_ref.getparent().attrib.pop('name')
-        except:
+        except Exception:
             pass
 
         try:
             if foot_ref.getparent().attrib['title'] == "":
                 foot_ref.getparent().attrib.pop('title')
-        except:
+        except Exception:
             pass
 
     return(htmlRoot)
@@ -121,9 +121,9 @@ def fix_ordered_lists(htmlRoot):
                         span.text = ' '
                         try:
                             span.drop_tag()
-                        except:
+                        except Exception:
                             pass
-            except:
+            except Exception:
                 pass
     return (htmlRoot)
 

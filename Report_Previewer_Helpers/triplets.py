@@ -59,7 +59,7 @@ def map_classes_and_tags(htmlRoot, source):
                 if item.new_class is None:
                     try:
                         element.attrib.pop('class')
-                    except:
+                    except Exception:
                         pass
 
                 elif item.new_class is False:
@@ -68,7 +68,7 @@ def map_classes_and_tags(htmlRoot, source):
                 else:
                     element.attrib['class'] = item.new_class
 
-            except:
+            except Exception:
                 pass
 
 ##    set_of_classes_to_keep = set ()
@@ -88,7 +88,7 @@ def map_classes_and_tags(htmlRoot, source):
 ##                element.attrib.pop('class')
 ##            else:
 ##                set_of_unexpected_classes.add(element.attrib['class'])
-##        except:
+##        except Exception:
 ##            pass
 ##
 ##    print(set_of_classes_to_keep)

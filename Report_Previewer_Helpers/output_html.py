@@ -51,7 +51,7 @@ from .settings import REQUIRED as Required
 #     # try:
 #     Required['templates_dir']
 #     dir_util.copy_tree(Required['templates_dir'], str(output_folder_Path))
-#     # except:
+#     # except Exception:
 #     #     pass
 
 
@@ -141,10 +141,10 @@ class ReportHTML:
 
         if verbose:
             print(output_file_path)
-            print('self is')
+            print('\n')
             print(f'{self.report_web=}', f'{self.summary_web=}',
-                  f'{self.report_print=}', f'{self.summary_print}')
-
+                  f'{self.report_print=}', f'{self.summary_print}',
+                  sep='\n')
 
 
         # try to open in a web browser
@@ -257,7 +257,7 @@ def separate_summary(html_: ReportHTML) -> Tuple[Optional[OutputHTML], Optional[
                     break
 
     # sometimes there is no summary
-    if not report_start:
+    if report_start is None:  # use is not None or lxml will complain
         xpath = '//h2 |  //*[@class="SummaryHeading"] | //*[@class="ChapterHeading1"]'
         headings = html_.root.xpath(xpath)
         if headings:
@@ -274,6 +274,12 @@ def separate_summary(html_: ReportHTML) -> Tuple[Optional[OutputHTML], Optional[
     report: Optional[OutputHTML] = None
 
     if summary_start is not None:
+
+        # debuging info
+        # print(f'\n{html.tostring(summary_start)}'
+        #       f'\n{html.tostring(report_start)}'
+        #       f'\n{html.tostring(summary_e)}')
+
         move_sibs(summary_start, report_start, summary_e)
         summary = _web_html(summary_e, 'summary', html_.metadata)
 
@@ -347,7 +353,7 @@ def _web_html(element: _Element, page: str, meta: dict) -> OutputHTML:
             report_title_ele.text = meta['report_title'] + ' – Report Summary'
         elif page == 'report':
             report_title_ele.text = meta['report_title']
-    except:
+    except Exception:
         pass
 
     try:
@@ -371,16 +377,16 @@ def _web_html(element: _Element, page: str, meta: dict) -> OutputHTML:
     except Exception as e:
         feedback.warning(f'Publication Date not added to the output. {e}')
 
-    try:
-        shell_root.find('.//*[@id="witness-heading-link"]').set('href', meta['inquiry_publications'])
-        shell_root.find('.//*[@id="writEv-heading-link"]').set('href', meta['inquiry_publications'])
-    except Exception as e:
-        feedback.warning(f'Inquiry Publications not added to the output. {e}')
+    # try:
+    #     shell_root.find('.//*[@id="witness-heading-link"]').set('href', meta['inquiry_publications'])
+    #     shell_root.find('.//*[@id="writEv-heading-link"]').set('href', meta['inquiry_publications'])
+    # except Exception as e:
+    #     feedback.warning(f'Inquiry Publications not added to the output. {e}')
 
-    try:
-        shell_root.find('.//*[@id="pastRep-heading-link"]').set('href', meta['committee_publications'])
-    except Exception as e:
-        feedback.warning(f'Committee publications not added to the output. {e}')
+    # try:
+    #     shell_root.find('.//*[@id="pastRep-heading-link"]').set('href', meta['committee_publications'])
+    # except Exception as e:
+    #     feedback.warning(f'Committee publications not added to the output. {e}')
 
 
     output_html.entryPoint.append(element)

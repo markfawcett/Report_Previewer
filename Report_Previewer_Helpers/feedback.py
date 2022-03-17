@@ -50,9 +50,9 @@ def writeln(line_of_feedback):
                     os.mkdir(directory)
                 feedback_file = open(directory + GUID + '.txt', 'a')
                 feedback_file.write(str(datetime.datetime.now()) + "\t" + line_of_feedback + '\n')
-        except:
+        except Exception:
             pass
     try:
         print(line_of_feedback)
-    except:
+    except Exception:
         pass

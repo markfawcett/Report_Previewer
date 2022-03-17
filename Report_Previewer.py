@@ -4,6 +4,7 @@
 from copy import deepcopy
 import os
 from pathlib import Path
+import subprocess
 import sys
 import time
 import traceback
@@ -27,6 +28,11 @@ except ModuleNotFoundError as e:
     print('Error: The script requires the Report_Previewer_Helpers folder.\n', e)
 
 ReportHTML = output_html.ReportHTML
+
+
+# Oxygen PDF chemistry location
+CHEMISTRY_PATH = Path('C:\Program Files\Oxygen XML Editor 20\oxygenChemistry.bat')
+CSS_PATH = Path(R"C:\Users\fawcettm\projects\Report_Previewer\css\summary-overview-print.css")
 
 
 def main():
@@ -71,8 +77,38 @@ def main():
         my_observer.join()
 
 
+def run_chemistry(print_html_path: Path):
+    """Run Oxygen PDF chemistry on for print html files."""
+
+    # A trial version of PDF chemistry is installed with the Oxygen edditor
+    # We will look for that and if it's there turn the html into a PDF.
+    
+    pdf_path = print_html_path.with_suffix('.pdf')
+
+    if CHEMISTRY_PATH.exists():
+        # create a command like:
+        # "C:\Program Files\Oxygen XML Editor 20\oxygenChemistry.bat"
+        # -in ".\Committee version - Sexual health - draft report as amended-print-summary.html"
+        # -out test.pdf
+        # -css .\css\summary-overview.css
+        # -Xmx2048m
+
+        comand = [str(CHEMISTRY_PATH),
+                  "-in", str(print_html_path),
+                  "-out", str(pdf_path),
+                  "-css", str(CSS_PATH),
+                  "-Xmx2048m"]
+
+        print(comand)
+    
+        chem = subprocess.Popen(comand)
+        return_code = chem.wait()
+        # print(return_code)
+        # print(f'{chem.pid=}')
+
+
 def wait_msg(watched_Path):
-    print('\nWaiting for files to be added to:\n  {}\n'.format(watched_Path))
+    print(f'\nWaiting for files to be added to:\n  {watched_Path}\n')
 
 def roubust_execution(funcs, input_html):
     for func in funcs:
@@ -143,7 +179,7 @@ def on_created(event, watched_Path):
 
     # I wonder if we should now delete both parameters.txt and the html_Path
     html_Path.unlink(missing_ok=True)  # deletes the file
-    parameters_file.unlink(missing_ok=True)
+    # parameters_file.unlink(missing_ok=True)
 
     # reprint wait message
     wait_msg(watched_Path)
@@ -239,26 +275,28 @@ def process_html(input_html_Path: Path, metadata: Dict[str, str]):
     if summary:  # could be None
         print('\nCreating summary:')
         # summary.write(output_html.OutputPaths['summary_web'])
-        summary.write(ReportHTML.summary_web, verbose=True)
+        summary.write(ReportHTML.summary_web, verbose=False)
 
         # lets also have a go at creating a print-summary
         print_summary = summary.make_print_version()
         if print_summary:
             # print_summary.write(output_html.OutputPaths['summary_print'], open_in_browser=False)
-            print_summary.write(ReportHTML.summary_print, open_in_browser=False, verbose=True)
-            # try running oxygen PDF chemistry if it exists
+            print_summary.write(ReportHTML.summary_print, open_in_browser=False, verbose=False)
+            # try running oxygen PDF chemistry
+            run_chemistry(ReportHTML.summary_print)
     else:
         feedback.warning('Summary not created')
 
     if report:
         print('\nCreating full report')
         # report.write(output_html.OutputPaths['report_web'])
-        report.write(ReportHTML.report_web, verbose=True)
+        report.write(ReportHTML.report_web, verbose=False)
 
         print_report = report.make_print_version()
         if print_report:
             # print_report.write(output_html.OutputPaths['report_print'], open_in_browser=False)
-            print_report.write(ReportHTML.report_print, open_in_browser=False, verbose=True)
+            print_report.write(ReportHTML.report_print, open_in_browser=False, verbose=False)
+            run_chemistry(ReportHTML.report_print)
     else:
         feedback.warning('Full report not created')
 
