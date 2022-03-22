@@ -10,7 +10,7 @@ from distutils.errors import DistutilsFileError
 
 # Import third-party modules
 from lxml import html  # type: ignore
-from lxml.etree import _Element, Element, ElementTree  # type: ignore
+from lxml.etree import _Element, Element, ElementTree, dump  # type: ignore
 
 # Local imports
 from . import feedback
@@ -200,14 +200,6 @@ class OutputHTML(ReportHTML):
         body = shell.root.find('body')
         body.extend(report_body)  # will work even if there is more that one report-body
 
-        # remove non-breaking spaces as oxygen PDF chemistry does not like them
-        for ele in body.iter():
-            if ele.text:
-                ele.text = ele.text.replace('\u00A0', ' ')  # remove no break space
-                ele.text = ele.text.replace('\u00AD', '')  # remove discretionary hyphens
-            if ele.tail:
-                ele.tail = ele.tail.replace('\u00A0', ' ')  # remove no break space
-                ele.tail = ele.tail.replace('\u00AD', '')  # remove discretionary hyphens
 
         # look through report-body for elements that should be in an `recommendations-container`
         recomendations_headings = body.xpath('.//h3[contains(text(),"ecommendations")]')
@@ -225,6 +217,28 @@ class OutputHTML(ReportHTML):
                 elements_for_div.append(sibling)
 
             container_div.extend(elements_for_div)
+
+        # remove non-breaking spaces as oxygen PDF chemistry does not like them
+        for i, ele in enumerate(shell.root.iter()):
+            if ele.text:
+                if i < 3:
+                    print('here')
+                if i < 2000 and '\u00A0' in ele.text:
+                    dump(ele)
+                ele.text = ele.text.replace('\u00A0', ' ')  # remove no break space
+                ele.text = ele.text.replace('\u00AD', '')  # remove discretionary hyphens
+
+                if '\u00A0' in ele.text:
+                    print('Still text!')
+                    dump(ele)
+
+            if ele.tail:
+                ele.tail = ele.tail.replace('\u00A0', ' ')  # remove no break space
+                ele.tail = ele.tail.replace('\u00AD', '')  # remove discretionary hyphens
+
+                if '\u00A0' in ele.tail:
+                    print('Still tail!')
+                    dump(ele)
 
         return shell
 

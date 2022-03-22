@@ -11,6 +11,9 @@ $tracking: 1px;
   html{
     font-size: 13.25pt;
     line-height: 1.2;
+
+    hyphens: manual;
+
   }
   // disable gray background
   body{
@@ -75,7 +78,7 @@ $tracking: 1px;
     color: $purple;
   }
 
-  p, li{
+  p, li, li.UnorderedList1{
     @include font-face(standard);
     color: $text_color;
     font-size: 1rem;
@@ -258,7 +261,8 @@ $tracking: 1px;
   margin-right: 16mm;
   margin-top: 24mm;
   @bottom-center {
-    content: counter(page, lower-roman);
+    // content: counter(page, lower-roman);
+    content: counter(page, arabic);
     font-family: 'National';
     color: $purple;
     font-size: 8pt;
